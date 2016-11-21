@@ -13,6 +13,7 @@ from glove_calibration import calibrate_glove
 from robolimb import RoboLimb
 from cross_validation import MovementCrossValidation
 from decision_theory import RocThreshold, control_action
+from delsys_server import DelsysStation
 
 __all__ = ["BinParm",   "DatasetRaw", "DatasetRaw",
            "WienerFilter", "SmartHand", "RoboLimb", "Buffer", "emg_filter_comb", 
@@ -22,4 +23,5 @@ __all__ = ["BinParm",   "DatasetRaw", "DatasetRaw",
            "imu_filter_lowpass", "imu_filter_highpass", "imu_filter_bandpass",
            "imu_filter_comb", "vaf_score", "vaf_mv_score", "balanced_accuracy_score", "balanced_log_loss", 
            "get_number_imu_signals", "get_acc_indices", "get_gyro_indices", "get_mag_indices", "get_imu_indices","calibrate_glove", "strip_inactive", "get_num_windows",
-           "MovementCrossValidation", "ismember", "RocThreshold", "control_action", "stimulus_presentation", "write_to_txt", "dump_raw_data"]
+           "MovementCrossValidation", "ismember", "RocThreshold", "control_action", "stimulus_presentation", "write_to_txt", "dump_raw_data",
+		   "DelsysStation"]
