@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import toeplitz
 from scipy.signal import lfilter
-from PyEMG.metrics import vaf_score, vaf_mv_score
+from pyEMG.metrics import vaf_score, vaf_mv_score
 
 class WienerFilter(object):
     """Wiener Filter regression. 

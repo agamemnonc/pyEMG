@@ -19,7 +19,7 @@ import thread
 from struct import unpack
 import numpy as np
 import timeit
-from PyEMG import Buffer
+from pyEMG import Buffer
 
 class DelsysStation(object):
     '''
