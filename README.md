@@ -1,3 +1,10 @@
 # pyEMG
 
 Python package for offline and real-time myoelectric control by using sEMG and IMU signals.
+
+## Dependencies
+* [numpy](http://www.numpy.org/)
+* [scipy](https://www.scipy.org/)
+* [scikit-learn](http://scikit-learn.org/stable/)
+* [pyserial](https://github.com/pyserial/pyserial) (for controlling SmartHand)
+* [python-can](https://pypi.python.org/pypi/python-can/) (for controlling RoboLimb)
