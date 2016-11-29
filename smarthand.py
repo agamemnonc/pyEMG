@@ -172,7 +172,8 @@ class SmartHand(object):
                                  int(pos_array[2]*255), int(pos_array[3]*255), 
                                  int(pos_array[4]*255), '\x48')))
         if nb == 7:
-            self.finger_pos_ = pos_array
+            self.finger_set_ = pos_array
+        self.finger_pos_ = self.get_finger_pos()
         
 
     def stop(self):
