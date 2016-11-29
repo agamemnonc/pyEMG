@@ -40,7 +40,7 @@ class SmartHand(object):
         self.finger_set_ = np.zeros(n_df, dtype=float) # Desired finger positions
 
         self.pose_ = None
-        self.__executing = False # TODO: implement this
+        self.__executing = False
 
 
     def start(self):
@@ -239,7 +239,11 @@ class SmartHand(object):
         self.pose_ = grasp_name
     
     def is_executing(self):
-        """Read the value of private attribute self.__executing."""
+        """Update the private attribute __executing based on finger_status_"""
+        if 'moving' in self.finger_status_:
+            self.__executing = True
+        else:
+            self.__executing = False
         return self.__executing
            
     def __ignore_inf_nan(self, pos_array):
