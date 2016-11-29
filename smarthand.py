@@ -1,5 +1,6 @@
 """Interface the SmartHand of the BioRobotics Institute of the Scuola
 Superiore Sant' Anna (Pontedera/Pisa) via serial port."""
+from __future__ import division
 import serial, serial.tools.list_ports
 import numpy as np
 import struct
