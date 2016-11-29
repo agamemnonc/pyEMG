@@ -34,6 +34,8 @@ class SmartHand(object):
         
         self.n_df = n_df
 
+        self.finger_status_ = np.chararray((n_df,), itemsize=6)
+        self.finger_status_[:] = 'steady'
         self.finger_pos_ = np.zeros(n_df, dtype=float) # Finger positions
         self.finger_set_ = np.zeros(n_df, dtype=float) # Desired finger positions
 
@@ -67,6 +69,41 @@ class SmartHand(object):
         if nb == 1:
             self.finger_pos_ = self.get_finger_pos()
 
+    def get_finger_status(self, finger=None):
+        """Argument finger: use None to read out all n_df statuses,
+        or a number between 0 and n_df-1 to read out a single status.
+        Any read out finger statuses will be updated in the objects
+        array finger_status_.
+        Returns an array of the updated finger status(es)
+
+        Values for 'finger' identify:
+        0 Thumb ab-/adduction
+        1 Thumb flexion/extension
+        2 Index finger flexion/extension
+        3 Middle finger flexion/extension
+        4 Ring+little finger flexion/extension
+        """
+
+        if finger == None:
+            ifingers = range(self.n_df)
+        else:
+            ifingers = [finger,]
+
+        for f in ifingers:
+            nb = self.si.write(bytearray(('\x4B', f)))
+            if nb == 2:
+                p = self.si.read()
+                if p != '':
+                    hex_value = struct.unpack('@B', p)[0] 
+                    bin_value = bin(int(str(hex_value), 16))[2:].zfill(8)
+                    moving_flag = int(bin_value[-1])
+                    if moving_flag:
+                        self.finger_status_[f] = 'moving'
+                    else:
+                        self.finger_status_[f] = 'steady'
+
+        return self.finger_status_[ifingers]
+        
     def get_finger_pos(self, finger=None):
         """Argument finger: use None to read out all n_df positions,
         or a number between 0 and n_df-1 to read out a single position.
