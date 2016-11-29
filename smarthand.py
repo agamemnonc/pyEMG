@@ -33,8 +33,8 @@ class SmartHand(object):
         
         self.n_df = n_df
 
-        self.finger_pos = np.zeros(n_df, dtype=float)
-        self.finger_set = np.zeros(n_df, dtype=float)
+        self.finger_pos_ = np.zeros(n_df, dtype=float)
+        self.finger_set_ = np.zeros(n_df, dtype=float)
 
         self.pose = None
         self.__executing = False # TODO: implement this
@@ -56,7 +56,7 @@ class SmartHand(object):
         nb = self.si.write(bytes('\x46'))
         time.sleep(2.0)
         if nb == 1:
-            self.finger_pos = self.get_finger_pos()
+            self.finger_pos_ = self.get_finger_pos()
 
     def first_calibration(self):
         """Mandatory calibration procedure after mechanical variations on the hand."""
@@ -64,7 +64,7 @@ class SmartHand(object):
         nb = self.si.write(bytes('\x42'))
         time.sleep(10.0)
         if nb == 1:
-            self.finger_pos = self.get_finger_pos()
+            self.finger_pos_ = self.get_finger_pos()
 
     def get_finger_pos(self, finger=None):
         """Argument finger: use None to read out all n_df positions,
@@ -93,9 +93,9 @@ class SmartHand(object):
             if nb == 2:
                 p = self.si.read()
                 if p != '':
-                    self.finger_pos[f] = float(struct.unpack('@B', p)[0] / 255.0)
+                    self.finger_pos_[f] = float(struct.unpack('@B', p)[0] / 255.0)
 
-        return self.finger_pos[ifingers]
+        return self.finger_pos_[ifingers]
 
 
     def set_finger_pos(self, pos_array, finger=None):
@@ -130,11 +130,11 @@ class SmartHand(object):
             nb.append(self.si.write(bytearray(('\x44', f, int(pos * 255.0)))))
 
         if nb.count(3) == len(nb):
-            self.finger_set[ifingers] = pos_array
-            self.finger_pos = self.get_finger_pos()
+            self.finger_set_[ifingers] = pos_array
+            self.finger_pos_ = self.get_finger_pos()
             return True
         else:
-            self.finger_pos = self.get_finger_pos()
+            self.finger_pos_ = self.get_finger_pos()
             return False
     
     def open_digits(self):
@@ -142,25 +142,25 @@ class SmartHand(object):
         nb = self.si.write(bytearray('\x4C')) # OpenALL command
         if nb == 1:
             #time.sleep(1.2)S
-            self.finger_pos = self.get_finger_pos()
+            self.finger_pos_ = self.get_finger_pos()
         
     def open_all(self):
         """ Resets all DOAs to open position."""
         
         nb = []
         nb.append(self.si.write(bytearray('\x4C'))) # OpenALL command
-        nb.append(self.set_finger_pos([0.0], finger = 0))
+        nb.append(self.set_finger_pos_([0.0], finger = 0))
         if nb.count(1) == len(nb):
             #time.sleep(1.2)
-            self.finger_pos = self.get_finger_pos()
+            self.finger_pos_ = self.get_finger_pos()
         
     def close_all(self):
         """ Sets all DOFs to closed position."""
         
-        nb = self.set_finger_pos(np.asarray([1.0, 1.0, 1.0, 1.0, 1.0]), finger = None)
+        nb = self.set_finger_pos_(np.asarray([1.0, 1.0, 1.0, 1.0, 1.0]), finger = None)
         if nb == True:
             #time.sleep(1.2)
-            self.finger_pos = self.get_finger_pos()
+            self.finger_pos_ = self.get_finger_pos()
 
     def posture(self, pos_array):
         """ Sets all DOFs to desired position. """
@@ -172,7 +172,7 @@ class SmartHand(object):
                                  int(pos_array[2]*255), int(pos_array[3]*255), 
                                  int(pos_array[4]*255), '\x48')))
         if nb == 7:
-            self.finger_pos = pos_array
+            self.finger_pos_ = pos_array
         
 
     def stop(self):
@@ -198,7 +198,7 @@ class SmartHand(object):
         nb = self.si.write(bytearray(('\x6f', grasp_code, grasp_force, grasp_steps)))
         #time.sleep(1.2)
         if nb == 4:
-           self.finger_pos = self.get_finger_pos()
+           self.finger_pos_ = self.get_finger_pos()
         self.pose = grasp_name
     
     def is_executing(self):
