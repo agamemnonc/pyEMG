@@ -162,8 +162,7 @@ class SmartHand(object):
     def posture(self, pos_array):
         """ Sets all DOFs to desired position. """
         pos_array = np.asarray(pos_array)
-        
-        #pos_array = self.__ignore_inf_nan(pos_array) # Ignore nan's and inf's
+        pos_array = self.__ignore_inf_nan(pos_array) # Ignore nan's and inf's
         
         nb = self.si.write(bytearray(('\x48', int(pos_array[0]*255), int(pos_array[1]*255), 
                                  int(pos_array[2]*255), int(pos_array[3]*255), 
