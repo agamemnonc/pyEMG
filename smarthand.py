@@ -36,7 +36,7 @@ class SmartHand(object):
         self.finger_pos_ = np.zeros(n_df, dtype=float)
         self.finger_set_ = np.zeros(n_df, dtype=float)
 
-        self.pose = None
+        self.pose_ = None
         self.__executing = False # TODO: implement this
 
 
@@ -196,7 +196,7 @@ class SmartHand(object):
         nb = self.si.write(bytearray(('\x6f', grasp_code, grasp_force, grasp_steps)))
         if nb == 4:
            self.finger_pos_ = self.get_finger_pos()
-        self.pose = grasp_name
+        self.pose_ = grasp_name
     
     def is_executing(self):
         """Read the value of private attribute self.__executing."""
