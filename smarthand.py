@@ -30,20 +30,20 @@ class SmartHand(object):
 
         self.si = serial.Serial(port=None, baudrate=b_rate, timeout=0.05, writeTimeout=0.05)
         self.si.port = s_port
-        self.si.open()
+        
         self.n_df = n_df
 
         self.finger_pos = np.zeros(n_df, dtype=float)
         self.finger_set = np.zeros(n_df, dtype=float)
 
-        self.fast_calibration()
         self.pose = None
         self.__executing = False # TODO: implement this
 
 
     def start(self):
-        """Sets the starting time for proper synchronization with other modules."""
-        # self.t_start = t
+        """Open port and perform fast calibration."""
+        self.si.open()
+        self.fast_calibration()
 
     def __del__(self):
         """Call stop_all() on destruct."""
