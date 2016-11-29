@@ -141,7 +141,6 @@ class SmartHand(object):
         """ Resets all DOAs except thumb rotation to open position."""
         nb = self.si.write(bytearray('\x4C')) # OpenALL command
         if nb == 1:
-            #time.sleep(1.2)S
             self.finger_pos_ = self.get_finger_pos()
         
     def open_all(self):
@@ -151,7 +150,6 @@ class SmartHand(object):
         nb.append(self.si.write(bytearray('\x4C'))) # OpenALL command
         nb.append(self.set_finger_pos([0.0], finger = 0))
         if nb.count(1) == len(nb):
-            #time.sleep(1.2)
             self.finger_pos_ = self.get_finger_pos()
         
     def close_all(self):
@@ -159,7 +157,6 @@ class SmartHand(object):
         
         nb = self.set_finger_pos_(np.asarray([1.0, 1.0, 1.0, 1.0, 1.0]), finger = None)
         if nb == True:
-            #time.sleep(1.2)
             self.finger_pos_ = self.get_finger_pos()
 
     def posture(self, pos_array):
@@ -197,7 +194,6 @@ class SmartHand(object):
         else:
             grasp_code = grasp_name
         nb = self.si.write(bytearray(('\x6f', grasp_code, grasp_force, grasp_steps)))
-        #time.sleep(1.2)
         if nb == 4:
            self.finger_pos_ = self.get_finger_pos()
         self.pose = grasp_name
