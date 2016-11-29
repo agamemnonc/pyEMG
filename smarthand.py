@@ -130,12 +130,11 @@ class SmartHand(object):
         for f, pos in zip(ifingers, pos_array):
             nb.append(self.si.write(bytearray(('\x44', f, int(pos * 255.0)))))
 
+        self.finger_pos_ = self.get_finger_pos()
         if nb.count(3) == len(nb):
             self.finger_set_[ifingers] = pos_array
-            self.finger_pos_ = self.get_finger_pos()
             return True
         else:
-            self.finger_pos_ = self.get_finger_pos()
             return False
     
     def open_digits(self):
