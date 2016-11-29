@@ -34,8 +34,8 @@ class SmartHand(object):
         
         self.n_df = n_df
 
-        self.finger_pos_ = np.zeros(n_df, dtype=float)
-        self.finger_set_ = np.zeros(n_df, dtype=float)
+        self.finger_pos_ = np.zeros(n_df, dtype=float) # Finger positions
+        self.finger_set_ = np.zeros(n_df, dtype=float) # Desired finger positions
 
         self.pose_ = None
         self.__executing = False # TODO: implement this
@@ -172,10 +172,14 @@ class SmartHand(object):
         self.finger_pos_ = self.get_finger_pos()
         
 
+    def stop_all(self):
+        """Stop all robot hand movement"""
+        self.si.write(bytes('\x41'))
+        
     def stop(self):
         """Stop all robot hand movement and control and close port"""
         if self.si.isOpen():
-            self.si.write(bytes('\x41'))
+            self.stop_all()
             self.si.close()
     
     def grasp(self, grasp_name, grasp_force = 200, grasp_steps = 20):
