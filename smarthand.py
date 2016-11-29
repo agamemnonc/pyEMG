@@ -149,7 +149,7 @@ class SmartHand(object):
         
         nb = []
         nb.append(self.si.write(bytearray('\x4C'))) # OpenALL command
-        nb.append(self.set_finger_pos_([0.0], finger = 0))
+        nb.append(self.set_finger_pos([0.0], finger = 0))
         if nb.count(1) == len(nb):
             #time.sleep(1.2)
             self.finger_pos_ = self.get_finger_pos()
