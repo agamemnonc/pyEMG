@@ -174,7 +174,7 @@ class SmartHand(object):
             return False
             
     def move_motor(self, finger, direction, speed=1.):
-        """Moves a DOA with specified direction and speed.
+        """Moves a DOA at specified direction and speed.
         
         Values for 'finger' identify:
         0 Thumb ab-/adduction
@@ -199,7 +199,37 @@ class SmartHand(object):
         byte_seq = "1" + str(S) + "{0:04b}".format(finger) + str(0) +  "{0:04b}".format(int(speed * 511)) # 9 bits --> 512 vaules
         byte_1, byte_2 = int(byte_seq[:8],2), int(byte_seq[8:],2)
         self.si.write(bytearray((byte_1, byte_2))) 
+    
+    def open_finger(self, finger, speed=1.):
+        """Opens a DOA at specified speed.
         
+        Values for 'finger' identify:
+        0 Thumb ab-/adduction
+        1 Thumb flexion/extension
+        2 Index finger flexion/extension
+        3 Middle finger flexion/extension
+        4 Ring+little finger flexion/extension
+        
+        Speed is in the range 0 (no movement) to 1 (full speed).
+        """
+        
+        self.move_motor(finger, direction="open", speed=speed)
+    
+    def close_finger(self, finger, speed=1.):
+        """Closes a DOA at specified speed.
+        
+        Values for 'finger' identify:
+        0 Thumb ab-/adduction
+        1 Thumb flexion/extension
+        2 Index finger flexion/extension
+        3 Middle finger flexion/extension
+        4 Ring+little finger flexion/extension
+        
+        Speed is in the range 0 (no movement) to 1 (full speed).
+        """
+        
+        self.move_motor(finger, direction="close", speed=speed)
+    
         
     def open_digits(self):
         """ Resets all DOAs except thumb rotation to open position."""

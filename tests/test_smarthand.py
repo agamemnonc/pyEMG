@@ -51,9 +51,9 @@ print(s.get_finger_status(finger), s.is_executing())
 s.stop()
 
 # Test 4: move motors
-finger = 4
-speed = 0.2
-direction = 'open'
+finger = 3
+speed = 0.8
+direction = 0
 s = SmartHand()
 s.start()
 s.move_motor(finger=finger, direction=direction,speed=speed)
