@@ -12,17 +12,14 @@ import numpy as np
 
 def random_position():
     pos = np.abs(np.random.randn(5))
-    pos_new = np.copy(pos)
-    for ii, pst in enumerate(pos_new):
-        if pst > 1.:
-            pos_new[ii] = 1.
-    return pos_new
+    pos[pos>1.] = 1
+    return pos
 
 # Test 1: set position for one finger
 s = SmartHand()
 s.start()
 s.set_finger_pos([0.9], 1)
-time.sleep(0.2)
+time.sleep(0.5)
 print('finger_set_: {}, \nfinger_pos_: {}, \nget_finger_pos: {}'.format(s.finger_set_, s.finger_pos_ , s.get_finger_pos()))
 s.stop()
 
@@ -42,7 +39,7 @@ time.sleep(0.5)
 print('finger_set_: {}, \nfinger_pos_: {}, \nget_finger_pos: {}'.format(s.finger_set_, s.finger_pos_ , s.get_finger_pos()))
 s.stop()
 
-# Test 3: 
+# Test 3: finger state and is_executing() method
 s = SmartHand()
 s.start()
 finger = 3
@@ -52,4 +49,13 @@ print(s.get_finger_status(finger), s.is_executing())
 time.sleep(1)
 print(s.get_finger_status(finger), s.is_executing())
 s.stop()
-       
+
+# Test 4: move motors
+finger = 4
+speed = 0.2
+direction = 'open'
+s = SmartHand()
+s.start()
+s.move_motor(finger=finger, direction=direction,speed=speed)
+time.sleep(1)
+s.stop()

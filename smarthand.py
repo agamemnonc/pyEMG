@@ -12,7 +12,6 @@ class SmartHand(object):
     and read out finger positions.
     TODO:   Implement __repr__, __str__
             Update self.finger_pos after each update. 
-            Test self.preshape_hand()
             """
 
     def __init__(self, s_port='COM10', b_rate=115200, n_df=5, settings=None):
@@ -108,7 +107,7 @@ class SmartHand(object):
         """Argument finger: use None to read out all n_df positions,
         or a number between 0 and n_df-1 to read out a single position.
         Any read out finger positions will be updated in the objects
-        array finger_pos.
+        array finger_pos_.
         Returns an array of the updated finger position(s)
 
         Values for 'finger' identify:
@@ -173,7 +172,35 @@ class SmartHand(object):
             return True
         else:
             return False
-    
+            
+    def move_motor(self, finger, direction, speed=1.):
+        """Moves a DOA with specified direction and speed.
+        
+        Values for 'finger' identify:
+        0 Thumb ab-/adduction
+        1 Thumb flexion/extension
+        2 Index finger flexion/extension
+        3 Middle finger flexion/extension
+        4 Ring+little finger flexion/extension
+        
+        Direction can be either binary (0/1) or string ("open"/"close").
+        Speed is in the range 0 (no movement) to 1 (full speed).
+        """
+        if isinstance(direction, str):
+            if direction == 'close':
+                S = 1
+            elif direction == 'open':
+                S = 0
+            else:
+                raise ValueError('Unrecognized direction')
+        else:
+            S = direction
+            
+        byte_seq = "1" + str(S) + "{0:04b}".format(finger) + str(0) +  "{0:04b}".format(int(speed * 511)) # 9 bits --> 512 vaules
+        byte_1, byte_2 = int(byte_seq[:8],2), int(byte_seq[8:],2)
+        self.si.write(bytearray((byte_1, byte_2))) 
+        
+        
     def open_digits(self):
         """ Resets all DOAs except thumb rotation to open position."""
         nb = self.si.write(bytearray('\x4C')) # OpenALL command
