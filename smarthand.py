@@ -196,7 +196,7 @@ class SmartHand(object):
         else:
             S = direction
             
-        byte_seq = "1" + str(S) + "{0:04b}".format(finger) + str(0) +  "{0:04b}".format(int(speed * 511)) # 9 bits --> 512 vaules
+        byte_seq = "1" + str(S) + "{0:04b}".format(finger) + str(0) +  "{0:09b}".format(int(speed * 511)) # 9 bits --> 512 vaules
         byte_1, byte_2 = int(byte_seq[:8],2), int(byte_seq[8:],2)
         self.si.write(bytearray((byte_1, byte_2))) 
     
