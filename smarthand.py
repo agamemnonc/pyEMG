@@ -249,7 +249,7 @@ class SmartHand(object):
     def close_all(self):
         """ Sets all DOFs to closed position."""
         
-        nb = self.set_finger_pos_(np.asarray([1.0, 1.0, 1.0, 1.0, 1.0]), finger = None)
+        nb = self.set_finger_pos(np.asarray([1.0, 1.0, 1.0, 1.0, 1.0]), finger = None)
         if nb == True:
             self.finger_pos_ = self.get_finger_pos()
 
