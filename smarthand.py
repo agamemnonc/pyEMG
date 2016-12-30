@@ -14,7 +14,7 @@ class SmartHand(object):
             Update self.finger_pos after each update. 
             """
 
-    def __init__(self, s_port='COM10', b_rate=115200, n_df=5, settings=None):
+    def __init__(self, s_port=None, b_rate=115200, n_df=5, settings=None):
         """Arguments:
         s_port - String argument containing serial port name (e.g., 'COM1' in Windows)
                  If set to None, tries to find available ports and takes the first one.
