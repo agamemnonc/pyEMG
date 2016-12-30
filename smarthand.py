@@ -304,7 +304,7 @@ class SmartHand(object):
         return self.__executing
            
     def __ignore_inf_nan(self, pos_array):
-        """Ignore nan or inf commands when setting position or posture. """
+        """Ignore nan or inf values when setting position or posture. """
         
         nan_idx = np.where(np.isnan(pos_array))
         inf_idx =  np.where(np.isinf(pos_array))
