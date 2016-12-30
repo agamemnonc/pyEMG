@@ -32,11 +32,9 @@ class SmartHand(object):
         self.si.port = s_port
         self.n_df = n_df
 
-        self.finger_state_ = ['stop' for i in range(6)] # Finger state; init to 'stop'
         self.finger_set_ = np.zeros(n_df, dtype=float) # Set finger positions
 
         self.pose_ = None
-        self.__executing = False
 
 
     def start(self):
@@ -81,6 +79,7 @@ class SmartHand(object):
         else:
             ifingers = [finger,]
 
+        state = []
         for f in ifingers:
             nb = self.si.write(bytearray(('\x4B', f)))
             if nb == 2:
@@ -90,11 +89,11 @@ class SmartHand(object):
                     bin_value = bin(int(str(hex_value), 16))[2:].zfill(8)
                     moving_flag = int(bin_value[-1])
                     if moving_flag:
-                        self.finger_state_[f] = 'moving'
+                        state.append('moving')
                     else:
-                        self.finger_state_[f] = 'stop'
+                        state.append('stop')
 
-        return [self.finger_state_[i] for i in ifingers]
+        return state
         
     def get_finger_pos(self, finger=None):
         """Argument finger: use None to read out all n_df positions,
@@ -283,13 +282,9 @@ class SmartHand(object):
         self.si.write(bytearray(('\x6f', grasp_code, grasp_force, grasp_steps)))
         self.pose_ = grasp_name
     
-    def is_executing(self):
-        """Update the private attribute __executing based on finger_state_"""
-        if 'moving' in self.finger_state_:
-            self.__executing = True
-        else:
-            self.__executing = False
-        return self.__executing
+    def __is_executing(self):
+        """Returns true if at least one df is moving."""
+        return True if 'moving' in self.finger_state_ else False
            
     def __ignore_inf_nan(self, pos_array):
         """Ignore nan or inf values when setting position or posture. """
@@ -305,5 +300,15 @@ class SmartHand(object):
             
     @property
     def finger_pos_(self):
-        """Finger positions. """
+        """Finger positions attribute. """
         return self.get_finger_pos()
+    
+    @property
+    def finger_state_(self):
+        """Finger states attribute. """
+        return self.get_finger_state()
+        
+    @property
+    def executing_(self):
+        """Finger moving attribute."""
+        return self.__is_executing()
