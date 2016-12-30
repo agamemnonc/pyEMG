@@ -30,11 +30,8 @@ class SmartHand(object):
 
         self.si = serial.Serial(port=None, baudrate=b_rate, timeout=0.05, writeTimeout=0.05)
         self.si.port = s_port
-        
         self.n_df = n_df
 
-        #self.finger_state_ = np.chararray((n_df,), itemsize=6)
-        #self.finger_state_[:] = 'stop'
         self.finger_state_ = ['stop' for i in range(6)] # Finger state; init to 'stop'
         self.finger_pos_ = np.zeros(n_df, dtype=float) # Finger positions
         self.finger_set_ = np.zeros(n_df, dtype=float) # Set finger positions
