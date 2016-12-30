@@ -242,15 +242,26 @@ class SmartHand(object):
         
         nb = []
         nb.append(self.si.write(bytearray('\x4C'))) # OpenALL command
-        nb.append(self.set_finger_pos([0.0], finger = 0))
+        nb.append(self.open_finger(0))
         if nb.count(1) == len(nb):
             self.finger_pos_ = self.get_finger_pos()
+    
+    def close_digits(self):
+        """ Sets all DOFs except thumb rotation to closed position."""
         
+        nb = []
+        for finger in range(1, self.n_df):
+            nb.append(self.close_finger(finger))
+        if nb.count(1) == len(nb):
+            self.finger_pos_ = self.get_finger_pos()
+            
     def close_all(self):
         """ Sets all DOFs to closed position."""
         
-        nb = self.set_finger_pos(np.asarray([1.0, 1.0, 1.0, 1.0, 1.0]), finger = None)
-        if nb == True:
+        nb = []
+        for finger in range(self.n_df):
+            nb.append(self.close_finger(finger))
+        if nb.count(1) == len(nb):
             self.finger_pos_ = self.get_finger_pos()
 
     def posture(self, pos_array):
