@@ -33,8 +33,9 @@ class SmartHand(object):
         
         self.n_df = n_df
 
-        self.finger_status_ = np.chararray((n_df,), itemsize=6)
-        self.finger_status_[:] = 'stop'
+        #self.finger_state_ = np.chararray((n_df,), itemsize=6)
+        #self.finger_state_[:] = 'stop'
+        self.finger_state_ = ['stop' for i in range(6)] # Finger state; init to 'stop'
         self.finger_pos_ = np.zeros(n_df, dtype=float) # Finger positions
         self.finger_set_ = np.zeros(n_df, dtype=float) # Set finger positions
 
@@ -68,12 +69,12 @@ class SmartHand(object):
         if nb == 1:
             self.finger_pos_ = self.get_finger_pos()
 
-    def get_finger_status(self, finger=None):
-        """Argument finger: use None to read out all n_df statuses,
-        or a number between 0 and n_df-1 to read out a single status.
-        Any read out finger statuses will be updated in the objects
-        array finger_status_.
-        Returns an array of the updated finger status(es)
+    def get_finger_state(self, finger=None):
+        """Argument finger: use None to read out all n_df states,
+        or a number between 0 and n_df-1 to read out a single state.
+        Any read out finger states will be updated in the objects
+        array finger_state_.
+        Returns an array of the updated finger state(s)
 
         Values for 'finger' identify:
         0 Thumb ab-/adduction
@@ -97,11 +98,11 @@ class SmartHand(object):
                     bin_value = bin(int(str(hex_value), 16))[2:].zfill(8)
                     moving_flag = int(bin_value[-1])
                     if moving_flag:
-                        self.finger_status_[f] = 'moving'
+                        self.finger_state_[f] = 'moving'
                     else:
-                        self.finger_status_[f] = 'stop'
+                        self.finger_state_[f] = 'stop'
 
-        return self.finger_status_[ifingers]
+        return [self.finger_state_[i] for i in ifingers]
         
     def get_finger_pos(self, finger=None):
         """Argument finger: use None to read out all n_df positions,
@@ -307,8 +308,8 @@ class SmartHand(object):
         self.pose_ = grasp_name
     
     def is_executing(self):
-        """Update the private attribute __executing based on finger_status_"""
-        if 'moving' in self.finger_status_:
+        """Update the private attribute __executing based on finger_state_"""
+        if 'moving' in self.finger_state_:
             self.__executing = True
         else:
             self.__executing = False
