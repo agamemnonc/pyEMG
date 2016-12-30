@@ -34,7 +34,7 @@ class SmartHand(object):
         self.n_df = n_df
 
         self.finger_status_ = np.chararray((n_df,), itemsize=6)
-        self.finger_status_[:] = 'steady'
+        self.finger_status_[:] = 'stop'
         self.finger_pos_ = np.zeros(n_df, dtype=float) # Finger positions
         self.finger_set_ = np.zeros(n_df, dtype=float) # Set finger positions
 
@@ -99,7 +99,7 @@ class SmartHand(object):
                     if moving_flag:
                         self.finger_status_[f] = 'moving'
                     else:
-                        self.finger_status_[f] = 'steady'
+                        self.finger_status_[f] = 'stop'
 
         return self.finger_status_[ifingers]
         
