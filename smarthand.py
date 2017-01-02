@@ -44,6 +44,11 @@ class SmartHand(object):
     def finger_pos_(self):
         """Finger positions attribute. """
         return self.get_finger_pos()
+    
+    @property
+    def finger_force_(self):
+        """Finger forces (tendon tension force sensors). """
+        return self.get_finger_force()
 
     @property
     def motor_current_(self):
@@ -289,7 +294,7 @@ class SmartHand(object):
     def get_motor_current(self, motor=None):
         """Argument finger: use None to read out all n_df currents,
         or a number between 0 and n_df-1 to read out a single current.
-        Returns an array of the updated finger current(s)
+        Returns an array of the finger current(s)
 
         Values for 'finger' identify:
         0 Thumb ab-/adduction
@@ -312,12 +317,42 @@ class SmartHand(object):
                 p = self.si.read(size=2)
                 if p != '':
                     byte_1, byte_2 = struct.unpack('@BB', p)
-                    curr = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
-                    current.append(curr)
+                    current_m = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
+                    current.append(current_m)
                     
         return current
                                
-            
+    def get_finger_force(self, finger=None):
+        """Argument finger: use None to read out all n_df forces,
+        or a number between 0 and n_df-1 to read out a single force.
+        Returns an array of the finger force(s)
+
+        Values for 'finger' identify:
+        0 Thumb ab-/adduction
+        1 Thumb flexion/extension
+        2 Index finger flexion/extension
+        3 Middle finger flexion/extension
+        4 Ring+little finger flexion/extension
+        
+        """
+
+        if finger == None:
+            ifingers = range(self.n_df)
+        else:
+            ifingers = [finger,]
+
+        force = []
+        for f in ifingers:
+            nb = self.si.write(bytes(f))
+            if nb == 1:
+                p = self.si.read(size=2)
+                if p != '':
+                    byte_1, byte_2 = struct.unpack('@BB', p)
+                    force_f = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
+                    force.append(force_f)
+                    
+        return force
+        
     def posture(self, pos_array):
         """ Sets all DOFs to desired position. """
         pos_array = np.asarray(pos_array)
