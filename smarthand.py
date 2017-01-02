@@ -115,7 +115,7 @@ class SmartHand(object):
                     if moving_flag:
                         state.append('moving')
                     else:
-                        state.append('stop')
+                        state.append('steady')
 
         return state
         
