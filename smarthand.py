@@ -33,7 +33,7 @@ class SmartHand(object):
 
         self.finger_pos_set_ = np.zeros(n_df, dtype=float) # Set finger positions
         self.finger_force_set_ = np.zeros(n_df, dtype=float) # Set finger forces
-        self.motor_current_set_ = np.zeros(n_df, dtype=float) # Set finger currents
+        self.motor_curr_set_ = np.zeros(n_df, dtype=float) # Set finger currents
         self.pose_ = None
     
     @property
@@ -54,7 +54,7 @@ class SmartHand(object):
     @property
     def motor_curr_(self):
         """Finger positions attribute. """
-        return self.get_motor_current()
+        return self.get_motor_curr()
         
     @property
     def executing_(self):
@@ -266,32 +266,6 @@ class SmartHand(object):
         for finger in range(self.n_df):
             self.close_finger(finger)
     
-    def set_motor_curr(self, curr_array, motor=None):
-        """ Sets all DOFs to desired currents.
-        
-        cur_array - array of currents (floats between 0.0 and 1.0)
-        finger - single integer between 0 and n_df-1 (expects a single value in
-                pos_array); None sets all n_df currents and expects a corresponding
-                size of pos_array
-                
-        """
-
-        if motor == None:
-            imotors = range(self.n_df)
-        else:
-            imotors = [motor,]
-            
-        curr_array = np.asarray(curr_array)        
-        
-        nb = []
-        for m, curr in zip(imotors, curr_array):
-            curr = int(curr*1023) # 10-bit encoding
-            byte_1, byte_2 = self.__int_to_two_byte_int(curr)
-            nb.append(self.si.write(bytearray(('\x5F', m, '\x61', int(byte_1,2), int(byte_2,2), m))))
-
-        if nb.count(6) == len(nb):
-            self.motor_current_set_[imotors] = curr_array
-    
     def get_motor_curr(self, motor=None):
         """Argument finger: use None to read out all n_df currents,
         or a number between 0 and n_df-1 to read out a single current.
@@ -322,6 +296,59 @@ class SmartHand(object):
                     curr.append(curr_m)
                     
         return curr
+    
+    
+    def set_motor_curr(self, curr_array, motor=None):
+        """ Sets all DOFs to desired currents.
+        
+        cur_array - array of currents (floats between 0.0 and 1.0)
+        motor - single integer between 0 and n_df-1 (expects a single value in
+                curr_array); None sets all n_df currents and expects a corresponding
+                size of cur_array
+                
+        """
+
+        if motor == None:
+            imotors = range(self.n_df)
+        else:
+            imotors = [motor,]
+            
+        curr_array = np.asarray(curr_array)        
+        
+        nb = []
+        for m, curr in zip(imotors, curr_array):
+            curr = int(curr*1023) # 10-bit encoding
+            byte_1, byte_2 = self.__int_to_two_byte_int(curr)
+            nb.append(self.si.write(bytearray(('\x5F', m, '\x61', int(byte_1,2), int(byte_2,2), m))))
+
+        if nb.count(6) == len(nb):
+            self.motor_curr_set_[imotors] = curr_array
+    
+    def set_motor_curr_pos(self, curr_array, motor=None):
+        """ Sets all DOFs to desired currents by using Current/Position mode.
+        
+        cur_array - array of currents (floats between 0.0 and 1.0)
+        motor - single integer between 0 and n_df-1 (expects a single value in
+                cur_array); None sets all n_df currents and expects a corresponding
+                size of cur_array
+                
+        """
+
+        if motor == None:
+            imotors = range(self.n_df)
+        else:
+            imotors = [motor,]
+            
+        curr_array = np.asarray(curr_array)        
+        
+        nb = []
+        for m, curr in zip(imotors, curr_array):
+            curr = int(curr*1023) # 10-bit encoding
+            byte_1, byte_2 = self.__int_to_two_byte_int(curr)
+            nb.append(self.si.write(bytearray(('\x5F', m, '\x66', int(byte_1,2), int(byte_2,2), m))))
+
+        if nb.count(6) == len(nb):
+            self.motor_curr_set_[imotors] = curr_array
                                
     def get_finger_force(self, finger=None):
         """Argument finger: use None to read out all n_df forces,
