@@ -32,6 +32,7 @@ class SmartHand(object):
         self.n_df = n_df
 
         self.finger_pos_set_ = np.zeros(n_df, dtype=float) # Set finger positions
+        self.finger_force_set_ = np.zeros(n_df, dtype=float) # Set finger forces
         self.motor_current_set_ = np.zeros(n_df, dtype=float) # Set finger currents
         self.pose_ = None
     
@@ -352,6 +353,39 @@ class SmartHand(object):
                     force.append(force_f)
                     
         return force
+    
+    def set_finger_force(self, force_array, finger=None):
+        """Argument finger: use None to set all n_df forces,
+        or a number between 0 and n_df-1 to set a single force.
+
+        Values for 'finger' identify:
+        0 Thumb ab-/adduction
+        1 Thumb flexion/extension
+        2 Index finger flexion/extension
+        3 Middle finger flexion/extension
+        4 Ring+little finger flexion/extension
+        
+        """
+
+        if finger == None:
+            ifingers = range(self.n_df)
+        else:
+            ifingers = [finger,]
+
+        force_array = self.__ignore_inf_nan(force_array) # Ignore nan's and inf's
+        
+        nb = []
+        for f, force in zip(ifingers, force_array):
+            f_bin = "{0:b}".format(f).zfill(6)
+            force_bin="{0:b}".format(force).zfill(10)
+            T9, T8 = force_bin[0], force_bin[1]
+            byte_1 = '\x4A'
+            byte_2 = struct.pack('@B', int(T9 + T8 + f_bin,2))
+            byte_3 = struct.pack('@B', int(f_bin[2:],2))
+            nb.append(self.si.write(bytearray((byte_1, byte_2, byte_3))))
+
+        if nb.count(3) == len(nb):
+            self.finger_force_set_[ifingers] = force_array
         
     def posture(self, pos_array):
         """ Sets all DOFs to desired position. """
