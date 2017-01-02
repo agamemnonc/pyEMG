@@ -51,7 +51,7 @@ class SmartHand(object):
         return self.get_finger_force()
 
     @property
-    def motor_current_(self):
+    def motor_curr_(self):
         """Finger positions attribute. """
         return self.get_motor_current()
         
@@ -265,7 +265,7 @@ class SmartHand(object):
         for finger in range(self.n_df):
             self.close_finger(finger)
     
-    def set_motor_current(self, curr_array, motor=None):
+    def set_motor_curr(self, curr_array, motor=None):
         """ Sets all DOFs to desired currents.
         
         cur_array - array of currents (floats between 0.0 and 1.0)
@@ -283,15 +283,15 @@ class SmartHand(object):
         curr_array = np.asarray(curr_array)        
         
         nb = []
-        for m, current in zip(imotors, curr_array):
-            current = int(current*1023) # 10-bit encoding
-            byte_1, byte_2 = self.__int_to_two_byte_int(current)
+        for m, curr in zip(imotors, curr_array):
+            curr = int(curr*1023) # 10-bit encoding
+            byte_1, byte_2 = self.__int_to_two_byte_int(curr)
             nb.append(self.si.write(bytearray(('\x5F', m, '\x61', int(byte_1,2), int(byte_2,2), m))))
 
         if nb.count(6) == len(nb):
             self.motor_current_set_[imotors] = curr_array
     
-    def get_motor_current(self, motor=None):
+    def get_motor_curr(self, motor=None):
         """Argument finger: use None to read out all n_df currents,
         or a number between 0 and n_df-1 to read out a single current.
         Returns an array of the finger current(s)
@@ -310,17 +310,17 @@ class SmartHand(object):
         else:
             imotors = [motor,]
 
-        current = []
+        curr = []
         for m in imotors:
             nb = self.si.write(bytearray(('\x49', m)))
             if nb == 2:
                 p = self.si.read(size=2)
                 if p != '':
                     byte_1, byte_2 = struct.unpack('@BB', p)
-                    current_m = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
-                    current.append(current_m)
+                    curr_m = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
+                    curr.append(curr_m)
                     
-        return current
+        return curr
                                
     def get_finger_force(self, finger=None):
         """Argument finger: use None to read out all n_df forces,
