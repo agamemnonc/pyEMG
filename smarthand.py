@@ -91,15 +91,19 @@ class SmartHand(object):
     def __str__(self):
         return "{}\nFinger states: {}\nFinger positions: {}\nFinger forces: {}\nMotor currents: {}" \
         .format(self.__class__.__name__, self.finger_state_, self.finger_pos_, self.finger_force_, self.motor_curr_)
-        
+
+    def __del__(self):
+        """Call stop() on destruct."""
+        self.stop()
+
     @property
     def finger_state_(self):
         return self.get_finger_state()
-            
+
     @property
     def finger_pos_(self):
         return self.get_finger_pos()
-    
+
     @property
     def finger_force_(self):
         return self.get_finger_force()
@@ -116,10 +120,12 @@ class SmartHand(object):
         """Open port and perform fast calibration."""
         self.si.open()
         self.fast_calibration()
-
-    def __del__(self):
-        """Call stop_all() on destruct."""
-        self.stop()
+        
+    def stop(self):
+        """Stop all robot hand movement and control and close port."""
+        if self.si.isOpen():
+            self.stop_all()
+            self.si.close()
 
     def fast_calibration(self):
         """Should always be done once the hand is switched on and should be used.
@@ -154,7 +160,56 @@ class SmartHand(object):
                     else:
                         state.append('steady')
         return state
-        
+
+    def move_motor(self, finger, direction, speed=1.):
+        """Moves a DOA at specified direction and speed.
+        Direction can be either binary (0/1) or string ("open"/"close").
+        Speed is in the range 0 (no movement) to 1 (full speed).
+        """
+        if isinstance(direction, str):
+            if direction == 'close':
+                S = 1
+            elif direction == 'open':
+                S = 0
+            else:
+                raise ValueError('Unrecognized direction')
+        else:
+            S = direction
+        byte_seq = "1" + str(S) + "{0:04b}".format(finger) + str(0) +  "{0:09b}".format(int(speed * 511)) # 9 bits --> 512 vaules
+        byte_1, byte_2 = int(byte_seq[:8],2), int(byte_seq[8:],2)
+        self.si.write(bytearray((byte_1, byte_2))) 
+
+    def open_finger(self, finger, speed=1.):
+        """Opens a DOA at specified speed.
+        Speed is in the range 0 (no movement) to 1 (full speed).
+        """
+        self.move_motor(finger, direction="open", speed=speed)
+
+    def close_finger(self, finger, speed=1.):
+        """Closes a DOA at specified speed.
+        Speed is in the range 0 (no movement) to 1 (full speed).
+        """
+        self.move_motor(finger, direction="close", speed=speed)
+
+    def open_digits(self):
+        """ Resets all DOAs except thumb rotation to open position."""
+        self.si.write(bytearray('\x4C')) # OpenALL command
+
+    def open_all(self):
+        """ Resets all DOAs to open position."""
+        self.si.write(bytearray('\x4C')) # OpenALL command
+        self.open_finger(finger=0)
+
+    def close_digits(self):
+        """ Sets all DOFs except thumb rotation to closed position."""
+        for finger in range(1, self.n_df):
+            self.close_finger(finger)
+
+    def close_all(self):
+        """ Sets all DOFs to closed position."""
+        for finger in range(self.n_df):
+            self.close_finger(finger)
+    
     def get_finger_pos(self, finger=None):
         """Argument finger: use None to read out all n_df positions,
         or a number between 0 and n_df-1 to read out a single position.
@@ -174,7 +229,6 @@ class SmartHand(object):
                 if p != '':
                     pos.append(float(struct.unpack('@B', p)[0] / 255.0))
         return pos
-
 
     def set_finger_pos(self, pos_array, finger=None):
         """Transmits a command to set new finger positions and updates the
@@ -196,57 +250,7 @@ class SmartHand(object):
             nb.append(self.si.write(bytearray(('\x44', f, int(pos * 255.0)))))
         if nb.count(3) == len(nb):
             self.finger_pos_set_[ifingers] = pos_array
-            
-    def move_motor(self, finger, direction, speed=1.):
-        """Moves a DOA at specified direction and speed.
-        Direction can be either binary (0/1) or string ("open"/"close").
-        Speed is in the range 0 (no movement) to 1 (full speed).
-        """
-        if isinstance(direction, str):
-            if direction == 'close':
-                S = 1
-            elif direction == 'open':
-                S = 0
-            else:
-                raise ValueError('Unrecognized direction')
-        else:
-            S = direction
-        byte_seq = "1" + str(S) + "{0:04b}".format(finger) + str(0) +  "{0:09b}".format(int(speed * 511)) # 9 bits --> 512 vaules
-        byte_1, byte_2 = int(byte_seq[:8],2), int(byte_seq[8:],2)
-        self.si.write(bytearray((byte_1, byte_2))) 
-    
-    def open_finger(self, finger, speed=1.):
-        """Opens a DOA at specified speed.
-        Speed is in the range 0 (no movement) to 1 (full speed).
-        """
-        self.move_motor(finger, direction="open", speed=speed)
-    
-    def close_finger(self, finger, speed=1.):
-        """Closes a DOA at specified speed.
-        Speed is in the range 0 (no movement) to 1 (full speed).
-        """
-        self.move_motor(finger, direction="close", speed=speed)
-    
-        
-    def open_digits(self):
-        """ Resets all DOAs except thumb rotation to open position."""
-        self.si.write(bytearray('\x4C')) # OpenALL command
-        
-    def open_all(self):
-        """ Resets all DOAs to open position."""
-        self.si.write(bytearray('\x4C')) # OpenALL command
-        self.open_finger(finger=0)
-    
-    def close_digits(self):
-        """ Sets all DOFs except thumb rotation to closed position."""
-        for finger in range(1, self.n_df):
-            self.close_finger(finger)
-            
-    def close_all(self):
-        """ Sets all DOFs to closed position."""
-        for finger in range(self.n_df):
-            self.close_finger(finger)
-    
+
     def get_motor_curr(self, motor=None):
         """Argument finger: use None to read out all n_df currents,
         or a number between 0 and n_df-1 to read out a single current.
@@ -286,7 +290,7 @@ class SmartHand(object):
             nb.append(self.si.write(bytearray(('\x5F', m, '\x61', int(byte_1,2), int(byte_2,2), m))))
         if nb.count(6) == len(nb):
             self.motor_curr_set_[imotors] = curr_array
-    
+
     def set_motor_curr_pos(self, curr_array, motor=None):
         """Sets all DOFs to desired currents by using Current/Position mode.
         cur_array - array of currents (floats between 0.0 and 1.0)
@@ -306,7 +310,7 @@ class SmartHand(object):
             nb.append(self.si.write(bytearray(('\x5F', m, '\x66', int(byte_1,2), int(byte_2,2), m))))
         if nb.count(6) == len(nb):
             self.motor_curr_set_[imotors] = curr_array
-                               
+ 
     def get_finger_force(self, finger=None):
         """Argument finger: use None to read out all n_df forces,
         or a number between 0 and n_df-1 to read out a single force.
@@ -326,7 +330,7 @@ class SmartHand(object):
                     force_f = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
                     force.append(force_f)       
         return force
-    
+
     def set_finger_force(self, force_array, finger=None):
         """Argument finger: use None to set all n_df forces,
         or a number between 0 and n_df-1 to set a single force.
@@ -361,12 +365,6 @@ class SmartHand(object):
     def stop_all(self):
         """Stop all robot hand movement."""
         self.si.write(bytes('\x41'))
-        
-    def stop(self):
-        """Stop all robot hand movement and control and close port."""
-        if self.si.isOpen():
-            self.stop_all()
-            self.si.close()
     
     def grasp(self, grasp_name, grasp_force = 200, grasp_steps = 20):
         
