@@ -228,7 +228,7 @@ class SmartHand(object):
                 p = self.si.read()
                 if p != '':
                     pos.append(float(struct.unpack('@B', p)[0] / 255.0))
-        return pos
+        return np.asarray(pos)
 
     def set_finger_pos(self, pos_array, finger=None):
         """Transmits a command to set new finger positions and updates the
@@ -269,7 +269,7 @@ class SmartHand(object):
                     byte_1, byte_2 = struct.unpack('@BB', p)
                     curr_m = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
                     curr.append(curr_m)       
-        return curr
+        return np.asarray(curr)
 
     def set_motor_curr(self, curr_array, motor=None):
         """ Sets all DOFs to desired currents.
@@ -329,7 +329,7 @@ class SmartHand(object):
                     byte_1, byte_2 = struct.unpack('@BB', p)
                     force_f = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
                     force.append(force_f)       
-        return force
+        return np.asarray(force)
 
     def set_finger_force(self, force_array, finger=None):
         """Argument finger: use None to set all n_df forces,
