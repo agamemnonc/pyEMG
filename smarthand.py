@@ -36,6 +36,14 @@ class SmartHand(object):
         self.motor_curr_set_ = np.zeros(n_df, dtype=float) # Set finger currents
         self.pose_ = None
     
+    def __repr__(self):
+        return "{}\nFinger states: {}\nFinger positions: {}\nFinger forces: {}\nMotor currents: {}" \
+        .format(self.__class__.__name__, self.finger_state_, self.finger_pos_, self.finger_force_, self.motor_curr_)
+    
+    def __str__(self):
+        return "{}\nFinger states: {}\nFinger positions: {}\nFinger forces: {}\nMotor currents: {}" \
+        .format(self.__class__.__name__, self.finger_state_, self.finger_pos_, self.finger_force_, self.motor_curr_)
+        
     @property
     def finger_state_(self):
         """Finger states attribute. """
