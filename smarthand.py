@@ -11,7 +11,6 @@ class SmartHand(object):
     """Handle some high level commands to the robotic hand via serial interface
     and read out finger positions.
     TODO:   Implement __repr__, __str__
-            Update self.finger_pos after each update. 
             """
 
     def __init__(self, s_port=None, b_rate=115200, n_df=5, settings=None):
@@ -32,10 +31,29 @@ class SmartHand(object):
         self.si.port = s_port
         self.n_df = n_df
 
-        self.finger_set_ = np.zeros(n_df, dtype=float) # Set finger positions
-
+        self.finger_pos_set_ = np.zeros(n_df, dtype=float) # Set finger positions
+        self.motor_current_set_ = np.zeros(n_df, dtype=float) # Set finger currents
         self.pose_ = None
+    
+    @property
+    def finger_state_(self):
+        """Finger states attribute. """
+        return self.get_finger_state()
+            
+    @property
+    def finger_pos_(self):
+        """Finger positions attribute. """
+        return self.get_finger_pos()
 
+    @property
+    def motor_current_(self):
+        """Finger positions attribute. """
+        return self.get_motor_current()
+        
+    @property
+    def executing_(self):
+        """Finger moving attribute."""
+        return self.__is_executing()
 
     def start(self):
         """Open port and perform fast calibration."""
@@ -159,10 +177,8 @@ class SmartHand(object):
             nb.append(self.si.write(bytearray(('\x44', f, int(pos * 255.0)))))
 
         if nb.count(3) == len(nb):
-            self.finger_set_[ifingers] = pos_array
-            return True
-        else:
-            return False
+            self.finger_pos_set_[ifingers] = pos_array
+
             
     def move_motor(self, finger, direction, speed=1.):
         """Moves a DOA at specified direction and speed.
@@ -243,7 +259,65 @@ class SmartHand(object):
         
         for finger in range(self.n_df):
             self.close_finger(finger)
+    
+    def set_motor_current(self, curr_array, motor=None):
+        """ Sets all DOFs to desired currents.
+        
+        cur_array - array of currents (floats between 0.0 and 1.0)
+        finger - single integer between 0 and n_df-1 (expects a single value in
+                pos_array); None sets all n_df currents and expects a corresponding
+                size of pos_array
+                
+        """
 
+        if motor == None:
+            imotors = range(self.n_df)
+        else:
+            imotors = [motor,]
+            
+        curr_array = np.asarray(curr_array)        
+        
+        nb = []
+        for m, current in zip(imotors, curr_array):
+            current = int(current*1023) # 10-bit encoding
+            byte_1, byte_2 = self.__int_to_two_byte_int(current)
+            nb.append(self.si.write(bytearray(('\x5F', m, '\x61', int(byte_1,2), int(byte_2,2), m))))
+
+        if nb.count(6) == len(nb):
+            self.motor_current_set_[imotors] = curr_array
+    
+    def get_motor_current(self, motor=None):
+        """Argument finger: use None to read out all n_df currents,
+        or a number between 0 and n_df-1 to read out a single current.
+        Returns an array of the updated finger current(s)
+
+        Values for 'finger' identify:
+        0 Thumb ab-/adduction
+        1 Thumb flexion/extension
+        2 Index finger flexion/extension
+        3 Middle finger flexion/extension
+        4 Ring+little finger flexion/extension
+        
+        """
+
+        if motor == None:
+            imotors = range(self.n_df)
+        else:
+            imotors = [motor,]
+
+        current = []
+        for m in imotors:
+            nb = self.si.write(bytearray(('\x49', m)))
+            if nb == 2:
+                p = self.si.read(size=2)
+                if p != '':
+                    byte_1, byte_2 = struct.unpack('@BB', p)
+                    curr = self.__two_byte_int_to_int(byte_1, byte_2) / 1023.
+                    current.append(curr)
+                    
+        return current
+                               
+            
     def posture(self, pos_array):
         """ Sets all DOFs to desired position. """
         pos_array = np.asarray(pos_array)
@@ -253,7 +327,7 @@ class SmartHand(object):
                                  int(pos_array[2]*255), int(pos_array[3]*255), 
                                  int(pos_array[4]*255), '\x48')))
         if nb == 7:
-            self.finger_set_ = pos_array
+            self.finger_pos_set_ = pos_array
 
     def stop_all(self):
         """Stop all robot hand movement"""
@@ -285,7 +359,23 @@ class SmartHand(object):
     def __is_executing(self):
         """Returns true if at least one df is moving."""
         return True if 'moving' in self.finger_state_ else False
-           
+    
+    def __int_to_two_byte_int(self, integer):
+        """Converts an integer value into two integer-formatted bytes."""
+        bin_format = "{0:b}".format(integer).zfill(16)
+        byte_1 = bin_format[:8]
+        byte_2 = bin_format[8:]
+        
+        return byte_1, byte_2
+    
+    def __two_byte_int_to_int(self, byte_1, byte_2):
+        """Converts two integer-formatted bytes into an integer."""
+        byte_1_bin = "{0:b}".format(byte_1).zfill(8)
+        byte_2_bin = "{0:b}".format(byte_2).zfill(8)
+        bytes_combined = byte_1_bin + byte_2_bin
+        
+        return int(bytes_combined, 2)
+    
     def __ignore_inf_nan(self, pos_array):
         """Ignore nan or inf values when setting position or posture. """
         
@@ -295,20 +385,5 @@ class SmartHand(object):
             pos_array[nan_idx] = self.get_finger_pos()[nan_idx]
         if inf_idx[0].size > 0:
             pos_array[inf_idx] = self.get_finger_pos()[inf_idx]
-        
-        return pos_array
             
-    @property
-    def finger_pos_(self):
-        """Finger positions attribute. """
-        return self.get_finger_pos()
-    
-    @property
-    def finger_state_(self):
-        """Finger states attribute. """
-        return self.get_finger_state()
-        
-    @property
-    def executing_(self):
-        """Finger moving attribute."""
-        return self.__is_executing()
+        return pos_array
