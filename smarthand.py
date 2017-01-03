@@ -1,7 +1,7 @@
 # Authors: Agamemnon Krasoulis <agamemnon.krasoulis@gmail.com>
 #          Tobias Pistohl <tobias.pistohl@bcf.uni-freiburg.de>
 
-from __future__ import division
+from __future__ import division, print_function
 import serial, serial.tools.list_ports
 import numpy as np
 import struct
@@ -73,7 +73,7 @@ class SmartHand(object):
             try:
                 s_port = serial.tools.list_ports.comports().next()[0]
             except StopIteration:
-                print "No serial ports found."
+                print("No serial ports found.")
 
         self.si = serial.Serial(port=None, baudrate=baud_rate, timeout=0.05, writeTimeout=0.05)
         self.si.port = s_port
@@ -377,7 +377,7 @@ class SmartHand(object):
             try:
                 grasp_code = grasp_dict[grasp_name]
             except KeyError:
-                print 'Unrecognised grasp name.'        
+                print("Unrecognised grasp name.")    
         else:
             grasp_code = grasp_name
         self.si.write(bytearray(('\x6f', grasp_code, grasp_force, grasp_steps)))
