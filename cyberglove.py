@@ -121,7 +121,7 @@ class CyberGlove(object):
             else:
                 self.data = np.vstack((self.data, cal_data))
                 self.time = np.hstack((self.time, timestamp))
-            time.sleep(0.02) # Wait 20 ms before sending the next request
+            time.sleep(1/self.s_rate) # Wait 20 ms before sending the next request
             
     def raw_measurement(self):
         """Performs a single measurment read from device (all sensor values). 
