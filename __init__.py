@@ -2,7 +2,7 @@ from bin_parm import BinParm
 from datasets import DatasetRaw
 from wiener_filter import WienerFilter
 from smarthand import SmartHand
-from CyberGlove import CyberGlove
+from cyberglove import CyberGlove
 from buffer import Buffer
 from features_online import get_wamp_feat, get_wl_feat, get_mv_feat, get_int_mode_feat, get_mav_feat, get_logvar_feat, get_ssc_feat, get_ar_feat, get_quantile_feat
 from emg_filter import emg_filter_bandpass, emg_filter_comb
