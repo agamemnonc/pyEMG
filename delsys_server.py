@@ -20,6 +20,7 @@ from struct import unpack
 import numpy as np
 import timeit
 from pyEMG.time_buffer import Buffer
+import time
 
 class DelsysStation(object):
     '''
@@ -124,6 +125,7 @@ class DelsysStation(object):
             self.__bytesPerSample * self.__signalsPerEmgSensor
             buf_index = 0
             dummy_cols = [] # No reserved bytes
+            sleep_time = 1./self.__emgRate
         elif mode == 'imu':
             shp = (-1, self.__numSensors * self.__signalsPerImuSensorTransmitted)
             recSize = self.samplesPerPacket * self.__numSensors * \
@@ -136,6 +138,8 @@ class DelsysStation(object):
             elif self.imuType == 'pry':
                 dummy_cols = np.sort(np.concatenate((self.__signalsPerImuSensorTransmitted*np.arange(self.__numSensors)+3, 
                                                      self.__signalsPerImuSensorTransmitted*np.arange(self.__numSensors)+4))) # 4th and 5th bytes are reserved
+            sleep_time = 1./self.__imuRate
+            
         while not self.exitFlag:
             data = server.recv(recSize)
 
@@ -155,6 +159,8 @@ class DelsysStation(object):
             else:
                 self.data[buf_index] = np.vstack((self.data[buf_index], data))
                 self.time[buf_index] = np.vstack((self.time[buf_index], np.ones((data.shape[0],1))*timestamp))
+            
+            time.sleep(sleep_time)
             
     
     def stop(self):
