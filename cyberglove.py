@@ -33,12 +33,15 @@ class CyberGlove(object):
     def __init__(self, n_df=None, s_port=None, baud_rate=115200, s_rate=30, 
                  buffered=True, buf_size=1., calibration_file=None):
         
-        # if n_df is not given assume 18-DOF Cyberglove but issue warning
+        # If n_df is not given assume 18-DOF Cyberglove but issue warning
         if n_df == None:
             warnings.warn("Cyberglove: number of DOFs not given, assuming 18.")
             self.n_df = 18
         else:
-            self.n_df = n_df
+            if n_df not in [18, 22]:
+                raise ValueError("Cyberglove can have either 18 or 22 degrees-of-freedom.")
+            else:
+                self.n_df = n_df
             
         # if port is not given use the first one available
         if s_port == None:
@@ -58,7 +61,10 @@ class CyberGlove(object):
         self._stopTime_ = None
         
         self.__exitFlag = False
-        self.__bytesPerRead = 20 # First and last bytes are reserved
+        if self.n_df == 18:
+            self.__bytesPerRead = 20 # First and last bytes are reserved
+        elif self.n_df == 22:
+            self.__bytesPerRead = 24 # First and last bytes are reserved
 
         if self.buffered:
             self.__buf_size_samples = int(np.ceil(self.s_rate * self.buf_size))
