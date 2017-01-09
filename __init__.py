@@ -3,7 +3,7 @@ from datasets import DatasetRaw
 from wiener_filter import WienerFilter
 from smarthand import SmartHand
 from cyberglove import CyberGlove
-from buffer import Buffer
+from time_buffer import Buffer
 from features_online import get_wamp_feat, get_wl_feat, get_mv_feat, get_int_mode_feat, get_mav_feat, get_logvar_feat, get_ssc_feat, get_ar_feat, get_quantile_feat
 from emg_filter import emg_filter_bandpass, emg_filter_comb
 from imu_filter import imu_filter_lowpass, imu_filter_highpass, imu_filter_bandpass, imu_filter_comb

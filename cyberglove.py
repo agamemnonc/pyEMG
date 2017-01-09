@@ -4,7 +4,7 @@ from __future__ import division, print_function
 import serial, serial.tools.list_ports
 import numpy as np
 import struct
-from pyEMG import Buffer
+from pyEMG.time_buffer import Buffer
 import timeit
 import warnings
 import thread
