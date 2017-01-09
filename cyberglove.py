@@ -175,7 +175,7 @@ class CyberGlove(object):
     
     def calibrate_data(self, data):
         """Calibrates raw data if a calibration file is provided."""
-        if self.calibrate_ == True:
+        if self.calibration_ == True:
             data = data + self.calibration_offset_
             data = data * self.calibration_gain_
             return data
