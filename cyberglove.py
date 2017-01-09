@@ -71,8 +71,10 @@ class CyberGlove(object):
             self.data = Buffer((self.__buf_size_samples, self.n_df))
             self.time = Buffer((self.__buf_size_samples,))
         else:
-            self.data = np.zeros((0, self.n_df))
-            self.time = np.zeros((0,))
+            #self.data = np.zeros((0, self.n_df))
+            self.data = np.zeros((self.n_df,))
+            #self.time = np.zeros((0,))
+            self.time = np.zeros((1,))
         
         if self.calibration_file is None:
             self.calibration_ = False
@@ -119,8 +121,10 @@ class CyberGlove(object):
                 self.data.push(cal_data)
                 self.time.push(timestamp)
             else:
-                self.data = np.vstack((self.data, cal_data))
-                self.time = np.hstack((self.time, timestamp))
+                #self.data = np.vstack((self.data, cal_data))
+                self.data = cal_data
+                #self.time = np.hstack((self.time, timestamp))
+                self.time = timestamp
             time.sleep(1/self.s_rate) # Wait 20 ms before sending the next request
             
     def raw_measurement(self):
