@@ -51,7 +51,7 @@ class DelsysStation(object):
         list of timestamps (1st: EMG, 2nd: IMU)  
     '''
     def __init__(self, buffered=True, host_ip = '127.0.0.1', bufsize = 1.,
-                 samplesPerPacket = 1, imu_type=None, start_time=None):
+                 samplesPerPacket = 1, imu_type=None):
         
         self.host = host_ip
         self.dataPort = 50043
@@ -82,8 +82,6 @@ class DelsysStation(object):
         else:
             raise ValueError('Unrecognised type of IMU transmission.')
         
-        self._startTime = start_time
-        self._stopTime = None
         if self.buffered:
             self._emgBufSize = int(np.ceil(self.__emgRate * self.bufsize))
             self._imuBufSize = int(np.ceil(self.__imuRate * self.bufsize))
@@ -113,7 +111,7 @@ class DelsysStation(object):
         print "connected"
         self.sdk.send('START\r\n\r\n')
         self.sdk.recv(1024)
-        self._startTime = timeit.default_timer() if self._startTime is None else self._startTime
+        self._startTime = timeit.default_timer()
         self.exitFlag = False
         thread.start_new_thread(self.networking, (self.emg, 'emg'))
         thread.start_new_thread(self.networking, (self.imu, 'imu'))
