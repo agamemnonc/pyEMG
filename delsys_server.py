@@ -92,9 +92,9 @@ class DelsysStation(object):
             self.time = [Buffer((self._emgBufSize, 1)), \
             Buffer((self._imuBufSize, 1))]
         else:
-            self.data = [np.zeros((0, self.__numSensors)), \
-            np.zeros((0, self.__numSensors * self.__signalsPerImuSensor))]
-            self.time = [np.zeros((0,1)), np.zeros((0,1))]
+            self.data = [np.zeros((self.__numSensors,)), \
+            np.zeros((self.__numSensors * self.__signalsPerImuSensor,))]
+            self.time = [np.zeros((1,)), np.zeros((1,))]
         self.exitFlag = False
         
     def start(self):
@@ -155,8 +155,8 @@ class DelsysStation(object):
                 self.data[buf_index].push(data)
                 self.time[buf_index].push(np.ones((data.shape[0],1))*timestamp)
             else:
-                self.data[buf_index] = np.vstack((self.data[buf_index], data))
-                self.time[buf_index] = np.vstack((self.time[buf_index], np.ones((data.shape[0],1))*timestamp))
+                self.data[buf_index] = data
+                self.time[buf_index] = timestamp
             
     
     def stop(self):
@@ -176,5 +176,5 @@ class DelsysStation(object):
             self.time = [Buffer((self._emgBufSize, 1)), \
             Buffer((self._imuBufSize, 1))]
         else:
-             self.data = [np.zeros((0, self.__numSensors)), np.zeros((0, self.__numSensors*self.__signalsPerImuSensor))]   
-             self.time = [np.zeros((0,1)), np.zeros((0,1))]
+             self.data = [np.zeros((self.__numSensors,)), np.zeros((self.__numSensors*self.__signalsPerImuSensor,))]   
+             self.time = [np.zeros((1,)), np.zeros((1,))]
