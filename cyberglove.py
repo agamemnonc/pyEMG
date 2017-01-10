@@ -31,7 +31,7 @@ class CyberGlove(object):
     """ 
 
     def __init__(self, n_df=None, s_port=None, baud_rate=115200,
-                 buffered=True, buf_size=1., calibration_file=None, start_time=None):
+                 buffered=True, buf_size=1., calibration_file=None):
         
         # If n_df is not given assume 18-DOF Cyberglove but issue warning
         if n_df == None:
@@ -56,8 +56,6 @@ class CyberGlove(object):
         self.buf_size = buf_size
         self.calibration_file = calibration_file
         
-        self._startTime_ = start_time
-        self._stopTime_ = None
         
         self.__srate = 90 # Hardware sampling rate. TODO: Double-check this is correct
         self.__exitFlag = False
@@ -95,7 +93,7 @@ class CyberGlove(object):
     def start(self):
         """Open port and perform check."""
         self.si.open()
-        self._startTime_ = timeit.default_timer() if self._startTime_ is None else self._startTime_
+        self._startTime_ = timeit.default_timer()
         self.si.flushOutput()
         self.si.flushInput()
         thread.start_new_thread(self.networking, ())
@@ -104,6 +102,7 @@ class CyberGlove(object):
         """Close port."""
         self.__exitFlag = True
         time.sleep(0.1) # Wait 100 ms before closing the port just in case data are being transmitted
+        self._stopTime_ = timeit.default_timer()
         if self.si.isOpen():
             self.si.flushInput()
             self.si.flushOutput()
@@ -121,6 +120,7 @@ class CyberGlove(object):
             else:
                 self.data = cal_data
                 self.time = timestamp
+            time.sleep(0.01) # Wait 10 ms until before sending the next command
             
     def raw_measurement(self):
         """Performs a single measurment read from device (all sensor values). 
