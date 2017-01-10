@@ -114,6 +114,7 @@ class DelsysStation(object):
         self.sdk.send('START\r\n\r\n')
         self.sdk.recv(1024)
         self._startTime = timeit.default_timer() if self._startTime is None else self._startTime
+        self.exitFlag = False
         thread.start_new_thread(self.networking, (self.emg, 'emg'))
         thread.start_new_thread(self.networking, (self.imu, 'imu'))
         
@@ -163,7 +164,7 @@ class DelsysStation(object):
         ''' close connections to server '''
         self.exitFlag = True
         self.sdk.send("QUIT\r\n\r\n")
-        self._stopTime = timeit.default_timer() - self._startTime
+        self._stopTime = timeit.default_timer()
         self.emg.close()
         self.sdk.close()
         self.imu.close()
