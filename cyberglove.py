@@ -30,7 +30,7 @@ class CyberGlove(object):
         
     """ 
 
-    def __init__(self, n_df=None, s_port=None, baud_rate=115200, s_rate=30, 
+    def __init__(self, n_df=None, s_port=None, baud_rate=115200,
                  buffered=True, buf_size=1., calibration_file=None, start_time=None):
         
         # If n_df is not given assume 18-DOF Cyberglove but issue warning
@@ -52,7 +52,6 @@ class CyberGlove(object):
 
         self.si = serial.Serial(port=None, baudrate=baud_rate, timeout=0.05, writeTimeout=0.05)
         self.si.port = s_port
-        self.s_rate = s_rate
         self.buffered = buffered
         self.buf_size = buf_size
         self.calibration_file = calibration_file
@@ -60,6 +59,7 @@ class CyberGlove(object):
         self._startTime_ = start_time
         self._stopTime_ = None
         
+        self.__srate = 90 # Hardware sampling rate. TODO: Double-check this is correct
         self.__exitFlag = False
         if self.n_df == 18:
             self.__bytesPerRead = 20 # First and last bytes are reserved
@@ -67,7 +67,7 @@ class CyberGlove(object):
             self.__bytesPerRead = 24 # First and last bytes are reserved
 
         if self.buffered:
-            self.__buf_size_samples = int(np.ceil(self.s_rate * self.buf_size))
+            self.__buf_size_samples = int(np.ceil(self.__srate * self.buf_size))
             self.data = Buffer((self.__buf_size_samples, self.n_df))
             self.time = Buffer((self.__buf_size_samples,))
         else:
