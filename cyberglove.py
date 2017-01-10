@@ -121,7 +121,6 @@ class CyberGlove(object):
             else:
                 self.data = cal_data
                 self.time = timestamp
-            time.sleep(1/self.s_rate) # Wait T s (T: sampling period) before sending the next request
             
     def raw_measurement(self):
         """Performs a single measurment read from device (all sensor values). 
