@@ -10,6 +10,70 @@ import warnings
 import thread
 import time
 
+def load_calibration_file(calibration_file, n_df):
+    """Reads a calibration file and returns calibration_offset and 
+    calibration_gain values. Gains are converted from  radians to degrees. 
+    
+    The Finger1_3 and Finger5_3 values are not used as they do not
+    correspond to any DOFs currently implemented in the Cyberglove.
+    
+    There must be also a bug in how DCU stores the gain parameter for
+    Finger2_3 as this is saved in the Finger1_3 field. For this reaso,n
+    the indexes are slightly different for offset and gain.
+    
+    TODO: test with 22-DOF CyberGlove.
+    
+    Parameters
+    ----------
+    
+    calibration_file : string
+        Path where Cyberglove calibration file is stored.
+        
+    n_df : integer (18 or 22)
+        Degrees-of-freedom (DOFs) of the data glove.
+    
+    """
+    
+    f = open(calibration_file, 'r')
+    lines = f.readlines()
+    if n_df == 18:
+        lines_idx_offset = [2, 3, 4, 5, 7, 8, 12, 13, 15, 17, 18, 20, 22, 23, 25, 27, 28, 29]
+        lines_idx_gain = [2, 3, 4, 5, 7, 8, 12, 13, 9, 17, 18, 20, 22, 23, 25, 27, 28, 29]
+    elif n_df == 22:
+        lines_idx_offset = [2, 3, 4, 5, 7, 8, 9, 12, 13, 14, 15, 17, 18, 19, 20, 22, 23, 24, 25, 27, 28, 29]
+        lines_idx_gain = [2, 3, 4, 5, 7, 8, 9, 12, 13, 14, 10, 17, 18, 19, 20, 22, 23, 24, 25, 27, 28, 29]
+    else:
+        raise ValueError("Cyberglove can have either 18 or 22 DOFs.")
+    offset = []
+    gain = []
+    for line in lines_idx_offset:
+        offset.append(-float(lines[line].split(' ')[6]))
+    for line in lines_idx_gain:
+        gain.append(float(lines[line].split(' ')[9]) * (180 / np.pi)) # Convert from radians to degrees
+    calibration_offset = np.asarray(offset)
+    calibration_gain = np.asarray(gain)
+    return (calibration_offset, calibration_gain)
+
+def calibrate_data(data, calibration_offset, calibration_gain):
+    """Calibrates raw data.
+    
+    Parameters
+    ----------
+    data : array
+        Raw cyberglove data.
+    
+    calibration_offset : array
+        Sensor offsets.
+    
+    calibration_gain : array
+        Sensor offsets.
+        
+    """
+    
+    data = data + calibration_offset
+    data = data * calibration_gain
+    return data
+        
 class CyberGlove(object):
     """Interface the Cyberglove via a serial port. 
         
@@ -76,7 +140,7 @@ class CyberGlove(object):
             self.calibration_ = False
         else:
             self.calibration_ = True
-            self.load_calibration_file()
+            (self.calibration_offset_, self.calibration_gain_) = load_calibration_file(calibration_file, self.n_df)
                         
     def __repr__(self):
         """TODO"""
@@ -110,15 +174,16 @@ class CyberGlove(object):
     
     def networking(self):
         while not self.__exitFlag:
-            raw_data = self.raw_measurement()
-            cal_data = self.calibrate_data(raw_data)
+            data = self.raw_measurement()
+            if self.calibration_ is True:
+                data = calibrate_data(data, self.calibration_offset_, self.calibration_gain_)
             timestamp = np.asarray([timeit.default_timer()])
 
             if self.buffered is True:
-                self.data.push(cal_data)
+                self.data.push(data)
                 self.time.push(timestamp)
             else:
-                self.data = cal_data
+                self.data = data
                 self.time = timestamp
             time.sleep(0.01) # Wait 10 ms until before sending the next command
             
@@ -140,44 +205,5 @@ class CyberGlove(object):
                     raw_measurement = np.asarray(raw_measurement)
         return raw_measurement[1:-1] # First and last bytes are reserved
     
-    def load_calibration_file(self):
-        """Reads a calibration file and stores values into attributes
-        calibration_offset_ and calibration_gain_. Gains are converted from 
-        radians to degrees. 
-        
-        The Finger1_3 and Finger5_3 values are not used as they do not
-        correspond to any DOFs currently implemented in the Cyberglove.
-        
-        There must be also a bug in how DCU stores the gain parameter for
-        Finger2_3 as this is saved in the Finger1_3 field. For this reason
-        the indexes are slightly different for offset and gain.
-        
-        TODO: test with 22-DOF CyberGlove.
-        
-        """
-        f = open(self.calibration_file, 'r')
-        lines = f.readlines()
-        if self.n_df == 18:
-            lines_idx_offset = [2, 3, 4, 5, 7, 8, 12, 13, 15, 17, 18, 20, 22, 23, 25, 27, 28, 29]
-            lines_idx_gain = [2, 3, 4, 5, 7, 8, 12, 13, 9, 17, 18, 20, 22, 23, 25, 27, 28, 29]
-        elif self.n_dx == 22:
-            lines_idx_offset = [2, 3, 4, 5, 7, 8, 9, 12, 13, 14, 15, 17, 18, 19, 20, 22, 23, 24, 25, 27, 28, 29]
-            lines_idx_gain = [2, 3, 4, 5, 7, 8, 9, 12, 13, 14, 10, 17, 18, 19, 20, 22, 23, 24, 25, 27, 28, 29]
-        offset = []
-        gain = []
-        for line in lines_idx_offset:
-            offset.append(-float(lines[line].split(' ')[6]))
-        for line in lines_idx_gain:
-            gain.append(float(lines[line].split(' ')[9]) * (180 / np.pi)) # Convert from radians to degrees
-        self.calibration_offset_ = np.asarray(offset)
-        self.calibration_gain_ = np.asarray(gain)
     
-    def calibrate_data(self, data):
-        """Calibrates raw data if a calibration file is provided."""
-        if self.calibration_ == True:
-            data = data + self.calibration_offset_
-            data = data * self.calibration_gain_
-            return data
-        else:
-            return data
         
