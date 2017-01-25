@@ -185,7 +185,7 @@ class CyberGlove(object):
             else:
                 self.data = data
                 self.time = timestamp
-            time.sleep(0.01) # Wait 10 ms until before sending the next command
+            time.sleep(1./self.__srate) # Wait 10 ms until before sending the next command
             
     def raw_measurement(self):
         """Performs a single measurment read from device (all sensor values). 
