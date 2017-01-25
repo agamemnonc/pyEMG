@@ -121,7 +121,7 @@ class CyberGlove(object):
         self.calibration_file = calibration_file
         
         
-        self.__srate = 90 # Hardware sampling rate. TODO: Double-check this is correct
+        self.__srate = 100 # Hardware sampling rate. TODO: Double-check this is correct
         self.__exitFlag = False
         if self.n_df == 18:
             self.__bytesPerRead = 20 # First and last bytes are reserved
