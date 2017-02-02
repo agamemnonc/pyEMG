@@ -122,7 +122,6 @@ class CyberGlove(object):
         
         
         self.__srate = 100 # Hardware sampling rate. TODO: Double-check this is correct
-        self.__exitFlag = False
         if self.n_df == 18:
             self.__bytesPerRead = 20 # First and last bytes are reserved
         elif self.n_df == 22:
@@ -156,6 +155,7 @@ class CyberGlove(object):
     
     def start(self):
         """Open port and perform check."""
+        self.__networking = True
         self.si.open()
         self._startTime_ = timeit.default_timer()
         self.si.flushOutput()
@@ -164,7 +164,7 @@ class CyberGlove(object):
     
     def stop(self):
         """Close port."""
-        self.__exitFlag = True
+        self.__networking = False
         time.sleep(0.1) # Wait 100 ms before closing the port just in case data are being transmitted
         self._stopTime_ = timeit.default_timer()
         if self.si.isOpen():
@@ -173,7 +173,7 @@ class CyberGlove(object):
             self.si.close()
     
     def networking(self):
-        while not self.__exitFlag:
+        while self.__networking:
             data = self.raw_measurement()
             if self.calibration_ is True:
                 data = calibrate_data(data, self.calibration_offset_, self.calibration_gain_)
