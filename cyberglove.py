@@ -70,8 +70,8 @@ def calibrate_data(data, calibration_offset, calibration_gain):
         
     """
     
-    data = data + calibration_offset
     data = data * calibration_gain
+    data = data + calibration_offset
     return data
         
 class CyberGlove(object):
