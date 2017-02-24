@@ -93,7 +93,7 @@ class DelsysStation(object):
             self.data = [np.zeros((self.__numSensors,)), \
             np.zeros((self.__numSensors * self.__signalsPerImuSensor,))]
             self.time = [np.zeros((1,)), np.zeros((1,))]
-        self.exitFlag = False
+        self.exitFlag = True
         
     def start(self):
         ''' establish connection:
