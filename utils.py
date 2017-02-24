@@ -6,6 +6,7 @@ Created on Wed Mar 30 18:28:02 2016
 """
 import numpy as np
 import time
+from sklearn.preprocessing import MinMaxScaler
 
 def interpolate_time_vector(x):
     """ Time vector interpolation for time series signal. 
@@ -187,3 +188,16 @@ def dump_raw_data(streamer, outfile_emg, outfile_imu, time_interval = 1, start_p
         
         # Loop
         dump_raw_data(streamer=streamer, outfile_emg=outfile_emg, outfile_imu=outfile_imu, time_interval=time_interval, start_point=start_point)   
+
+class RobustMinMaxScaler(MinMaxScaler):
+    """MinMaxScaler with offset."""
+    def __init__(self, desired_feature_range=(0,1), offset=(0.1, 0.1), copy=True):
+        super(RobustMinMaxScaler, self).__init__(feature_range=(desired_feature_range[0] - offset[0], desired_feature_range[1] + offset[1]), copy=copy)
+        self.desired_feature_range = desired_feature_range        
+        self.offset = offset
+        
+    def transform(self, x):
+        x_sc = super(RobustMinMaxScaler, self).transform(x)
+        x_sc[x_sc < self.feature_range[0] + self.offset[0]] = self.feature_range[0] + self.offset[0]
+        x_sc[x_sc > self.feature_range[1] - self.offset[1]] = self.feature_range[1] - self.offset[1]
+        return x_sc
