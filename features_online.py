@@ -17,7 +17,11 @@ def get_mav_feat(x):
 def get_mv_feat(x):
     """Mean value feature. """
     return np.mean(x, axis=0)
-    
+
+def get_var_feat(x):
+    """Log-variance feature. """
+    return np.var(x, axis = 0)
+	
 def get_logvar_feat(x):
     """Log-variance feature. """
     return np.log(np.var(x, axis = 0))
