@@ -86,7 +86,7 @@ class WienerFilter(object):
         return x
     
     def _recover_output(self, x):
-        x = np.asarray(x)
+        #x = np.asarray(x)
         x = np.multiply(x, self._output_sigma)
         x = np.add(x, self._output_mean)
         return x
@@ -115,10 +115,10 @@ class WienerFilter(object):
         self._output_min = np.min(Y, axis = 0)
 
 
-        # Center and standardize inputs
-        X  = self._center_input(X)
-        X = self._standardize_input(X)
-        #  Center and standardize outputs
+#        # Center and standardize inputs
+#        X  = self._center_input(X)
+#        X = self._standardize_input(X)
+#        #  Center and standardize outputs
         Y = self._center_output(Y)
         Y = self._standardize_output(Y)
         
@@ -153,12 +153,12 @@ class WienerFilter(object):
                 c_ind = jj-self.num_feat
                 PXY[r_start:r_end,c_ind] = PHI[Nxy,ii+(jj)*numio]
                 
-        self.H = np.linalg.solve((PX + self.reg_lambda*np.ones_like(PX)), PXY)
+        self.H = np.linalg.solve((PX + self.reg_lambda*np.identity(PX.shape[0])), PXY)
         
         
-        
-        
-    def predict(self, X, normalizePrediction = False):
+    def predict(self, X, online=False, normalizePrediction=False):
+        """If batch is True, X.shape = (num_sam, num_feat), if not
+        X.shape = (num_lags, num_feat)."""
         X = np.asarray(X)
         # If input array is single-dimensional, reshape it
         if X.ndim == 1:
@@ -170,18 +170,23 @@ class WienerFilter(object):
         #if np.allclose(self.H, np.empty_like(self.H)):
             #raise('Model has not been fit yet.')
         
-        # Center and standardize inputs
-        X  = self._center_input(X, self._input_mean)
-        X = self._standardize_input(X, self._input_sigma)
+#        # Center and standardize inputs
+#        X  = self._center_input(X, self._input_mean)
+#        X = self._standardize_input(X, self._input_sigma)
         
-        num_samples = X.shape[0]
-        Y = np.zeros((num_samples,self.num_pred))
-        for ii in xrange(self.num_pred):
-            for jj in xrange(self.num_feat):
-                coef = self.H[jj*self.num_lags:(jj+1)*self.num_lags,ii]
-                Y[:,ii] += lfilter(coef,1,X[:,jj], axis = -1)
-        
-        Y = Y[self.num_lags-1:,:]
+        if online is not True:
+            num_samples = X.shape[0]
+            Y = np.zeros((num_samples,self.num_pred))
+            for ii in xrange(self.num_pred):
+                for jj in xrange(self.num_feat):
+                    coef = self.H[jj*self.num_lags:(jj+1)*self.num_lags,ii]
+                    Y[:,ii] += lfilter(coef,1,X[:,jj], axis = -1)
+            
+            Y = Y[self.num_lags-1:,:]
+        else:
+            X_ud = np.flipud(X)
+            Y = np.dot(X_ud.reshape(-1, order='F'), self.H)
+            
         Y = self._recover_output(Y)
         
         if normalizePrediction == True:
@@ -189,7 +194,7 @@ class WienerFilter(object):
             # Threshold in range [0,1]            
             Y[Y<0] = 0
             Y[Y>1] = 1
-            
+        
         return Y
     
     def evaluate(self,X,Y):
