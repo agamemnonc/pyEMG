@@ -20,7 +20,7 @@ def vaf_score(true,pred):
     ss_err = np.zeros(n_pred)
     ss_tot = np.zeros(n_pred)
     vaf = np.zeros(n_pred)
-    for jj in xrange(n_pred):
+    for jj in range(n_pred):
         ss_err[jj] = np.sum((true[:,jj]-pred[:,jj])**2)
         ss_tot[jj] = np.sum((true[:,jj]-np.mean(true[:,jj]))**2)
         vaf[jj] = 1 - (ss_err[jj]/ss_tot[jj])
@@ -42,7 +42,7 @@ def vaf_mv_score(true, pred):
     n_sam, n_pred = true.shape
     ss_err = np.zeros(n_pred)
     ss_tot = np.zeros(n_pred)
-    for jj in xrange(n_pred):
+    for jj in range(n_pred):
         ss_err[jj] = np.sum((true[:,jj]-pred[:,jj])**2)
         ss_tot[jj] = np.sum((true[:,jj]-np.mean(true[:,jj]))**2)
 

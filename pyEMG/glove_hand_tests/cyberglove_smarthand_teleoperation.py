@@ -27,24 +27,24 @@ def threshold_position(position, min_value=0., max_value=1.):
     position[position < min_value] = min_value
     position[position > max_value] = max_value
     return position
-    
+
 def bin_position(position, n=20):
     """Discretises prediction in n bins."""
     return np.floor(position*n)/n
-    
+
 def perform_min_max_calibration():
     """Min-max calibration for smarthand."""
-    
-    cg = CyberGlove(s_port=cg_port,n_df=cg_n_df, buffered=False, 
+
+    cg = CyberGlove(s_port=cg_port,n_df=cg_n_df, buffered=False,
                     buf_size=cg_buf_size, calibration_file=calibration_file)
     cg.start()
     min_values = 1e3*np.ones((5,))
     max_values = -1e3*np.ones((5,))
-    
+
     try:
         # Thumb rotation
         print("Move thumb rotation to extreme open position.")
-        for i in xrange(30):
+        for i in range(30):
             if cg.buffered is True:
                 data = np.mean(np.copy(cg.data.buffer), axis=0)
             else:
@@ -53,9 +53,9 @@ def perform_min_max_calibration():
             if th_rot < min_values[0]:
                 min_values[0] = th_rot
             time.sleep(0.1)
-        
+
         print("Move thumb rotation to extreme closed position.")
-        for i in xrange(30):
+        for i in range(30):
             if cg.buffered is True:
                 data = np.mean(np.copy(cg.data.buffer), axis=0)
             else:
@@ -64,10 +64,10 @@ def perform_min_max_calibration():
             if th_rot > max_values[0]:
                 max_values[0] = th_rot
             time.sleep(0.1)
-        
+
         # Thumb flexion
         print("Move thumb finger to extreme open position.")
-        for i in xrange(30):
+        for i in range(30):
             if cg.buffered is True:
                 data = np.mean(np.copy(cg.data.buffer), axis=0)
             else:
@@ -76,9 +76,9 @@ def perform_min_max_calibration():
             if th < min_values[1]:
                 min_values[1] = th
             time.sleep(0.1)
-        
+
         print("Move thumb finger to extreme closed position.")
-        for i in xrange(30):
+        for i in range(30):
             if cg.buffered is True:
                 data = np.mean(np.copy(cg.data.buffer), axis=0)
             else:
@@ -87,10 +87,10 @@ def perform_min_max_calibration():
             if th > max_values[1]:
                 max_values[1] = th
             time.sleep(0.1)
-        
+
         # Index/Middle/Ring-pinky flexion
         print("Move index, middle, ring and pinky fingers to extreme open position.")
-        for i in xrange(30):
+        for i in range(30):
             if cg.buffered is True:
                 data = np.mean(np.copy(cg.data.buffer), axis=0)
             else:
@@ -100,9 +100,9 @@ def perform_min_max_calibration():
                 if ind < min_values[joint]:
                     min_values[joint] = ind
             time.sleep(0.1)
-        
+
         print("Move index, middle, ring and pinky fingers to extreme closed position.")
-        for i in xrange(30):
+        for i in range(30):
             if cg.buffered is True:
                 data = np.mean(np.copy(cg.data.buffer), axis=0)
             else:
@@ -112,10 +112,10 @@ def perform_min_max_calibration():
                 if ind > max_values[joint]:
                     max_values[joint] = ind
             time.sleep(0.1)
-        
+
         cg.stop()
         return (min_values, max_values)
-        
+
     except KeyboardInterrupt:
         cg.stop()
 
@@ -133,15 +133,15 @@ def teleoperate(cyberglove, smarthand, gs_map, min_values, max_values):
 
 def main():
     min_values, max_values = perform_min_max_calibration()
-     
+
     # Teleoperation
-    cg = CyberGlove(s_port=cg_port,n_df=cg_n_df, buffered=cg_buffered, 
+    cg = CyberGlove(s_port=cg_port,n_df=cg_n_df, buffered=cg_buffered,
                         buf_size=cg_buf_size, calibration_file=calibration_file)
     cg.start()
     s = SmartHand(s_port='COM10')
     s.start()
     try:
-        while True: 
+        while True:
             t = threading.Thread(target=teleoperate, args=(cg, s, gs_map, min_values, max_values))
             t.daemon = True
             t.start()

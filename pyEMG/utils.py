@@ -9,11 +9,11 @@ import time
 from sklearn.preprocessing import MinMaxScaler
 
 def interpolate_time_vector(x):
-    """ Time vector interpolation for time series signal. 
-    
+    """ Time vector interpolation for time series signal.
+
     x : numpy array
-        Time - vector. 
-        
+        Time - vector.
+
     """
 
     x = np.asarray(x)
@@ -36,12 +36,12 @@ def interpolate_time_vector(x):
 #    x = np.asarray(x)
 #    y = np.zeros_like(x)
 #    y = np.linspace(start = x[0], stop = x[-1], num = x.size, endpoint = True)
-#    
+#
 #    return y
-#    
-        
+#
+
 def get_number_imu_signals(imu_type):
-    """Returns the number of IMU signals per sensor, depending on the 
+    """Returns the number of IMU signals per sensor, depending on the
     IMU transmission configuration."""
     if imu_type == 'raw':
         signals_per_sensor = 9
@@ -52,7 +52,7 @@ def get_number_imu_signals(imu_type):
     else:
         raise ValueError('Unrecognised IMU transmission configuration.')
     return signals_per_sensor
-    
+
 def get_acc_indices(sensors, signals_per_channel = 9):
     """Returns the indices for accelerometry data."""
     sensors = np.asarray(sensors)
@@ -97,7 +97,7 @@ def get_imu_indices(sensors, imu_type='quat'):
 def strip_inactive(emg, imu, glove, stimulus):
     """Strips inactive samples. All inputs are pandas data frames where the
     first column is the time vector. """
-    
+
     startall = 0
     endall = 1e7
     for x in [emg, imu, glove, stimulus]:
@@ -105,19 +105,19 @@ def strip_inactive(emg, imu, glove, stimulus):
             startall = x.iloc[0,0]
         if x.iloc[-1,0] < endall: # Last timestamp
             endall = x.iloc[-1,0]
-    
+
     emg = emg[emg['Time'] > startall]
     imu = imu[imu['Time'] > startall]
     glove = glove[glove['Time'] > startall]
     stimulus = stimulus[stimulus['Time'] > startall]
-    
+
     emg = emg[emg['Time'] < endall]
     imu = imu[imu['Time'] < endall]
     glove = glove[glove['Time'] < endall]
     stimulus = stimulus[stimulus['Time'] < endall]
-     
+
     return emg, imu, glove, stimulus
-            
+
 def get_num_windows(datasize, sRate, winsize, wininc):
     """ Gets the total number of windows for processing data for a given stream and specified winsize and wininc."""
     winsize_samples = sRate * winsize * 1e-3
@@ -148,20 +148,20 @@ def write_to_txt(outfile, array, fmt='%.18f'):
         footer='',   # file footer
         comments='# ',          # character to use for comments
         header='')      # file header
-    
+
     
 def stimulus_presentation(subject, trial_num, n_trials=15, n_objects=3, object_dict=None):
-    """ Returns stimulus presentation order in a reproducible manner."""    
+    """ Returns stimulus presentation order in a reproducible manner."""
     np.random.seed(seed=subject) # Reproducible results
-    
+
     # Check consistency
     assert(trial_num > 0 and trial_num <= n_trials)
-    
+
     stimuli = np.zeros((n_trials, n_objects), dtype=int)
-    for i in xrange(n_trials):
+    for i in range(n_trials):
         stimuli[i] = np.random.choice(range(1, n_objects+1), size=(n_objects), replace=False)
-    
-    if object_dict == None:    
+
+    if object_dict == None:
         return stimuli[trial_num-1]
     else:
         stim_object = []
@@ -174,28 +174,28 @@ def dump_raw_data(streamer, outfile_emg, outfile_imu, time_interval = 1, start_p
         # Make copies of two arrays as they consantly get udpated
         time_copy = [np.copy(streamer.time[0].buffer), np.copy(streamer.time[1].buffer)]
         data_copy = [np.copy(streamer.data[0].buffer), np.copy(streamer.data[1].buffer)]
-        
+
         # Find start and end
-        idx_start = [np.where(time_copy[0] > start_point[0])[0][0], np.where(time_copy[1] > start_point[1])[0][0]]  
-        idx_end =   [np.where(time_copy[0] > start_point[0])[0][-1], np.where(time_copy[1] > start_point[1])[0][-1]]  
-        
-        write_to_txt(outfile_emg, np.concatenate((time_copy[0][idx_start[0]:], data_copy[0][idx_start[0]:]), axis = 1))    
+        idx_start = [np.where(time_copy[0] > start_point[0])[0][0], np.where(time_copy[1] > start_point[1])[0][0]]
+        idx_end =   [np.where(time_copy[0] > start_point[0])[0][-1], np.where(time_copy[1] > start_point[1])[0][-1]]
+
+        write_to_txt(outfile_emg, np.concatenate((time_copy[0][idx_start[0]:], data_copy[0][idx_start[0]:]), axis = 1))
         write_to_txt(outfile_imu, np.concatenate((time_copy[1][idx_start[1]:], data_copy[1][idx_start[1]:]), axis = 1))
-        
+
         # Update new start point and wait
         start_point = [time_copy[0][idx_end[0]][0], time_copy[1][idx_end[1]][0]]
         time.sleep(time_interval)
-        
+
         # Loop
-        dump_raw_data(streamer=streamer, outfile_emg=outfile_emg, outfile_imu=outfile_imu, time_interval=time_interval, start_point=start_point)   
+        dump_raw_data(streamer=streamer, outfile_emg=outfile_emg, outfile_imu=outfile_imu, time_interval=time_interval, start_point=start_point)
 
 class RobustMinMaxScaler(MinMaxScaler):
     """MinMaxScaler with offset."""
     def __init__(self, desired_feature_range=(0,1), offset=(0.1, 0.1), copy=True):
         super(RobustMinMaxScaler, self).__init__(feature_range=(desired_feature_range[0] - offset[0], desired_feature_range[1] + offset[1]), copy=copy)
-        self.desired_feature_range = desired_feature_range        
+        self.desired_feature_range = desired_feature_range
         self.offset = offset
-        
+
     def transform(self, x):
         x_sc = super(RobustMinMaxScaler, self).transform(x)
         x_sc[x_sc < self.feature_range[0] + self.offset[0]] = self.feature_range[0] + self.offset[0]

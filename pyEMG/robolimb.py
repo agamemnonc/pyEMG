@@ -166,7 +166,7 @@ class RoboLimb(object):
     def open_fingers(self, velocity=None, force = True):
         """Opens all digits at specified velocity."""
         velocity = self.__dev_vel if velocity == None else int(velocity)
-#        for i in xrange(1,6):
+#        for i in range(1,6):
 #            self.open_finger(finger=i, velocity=velocity, force=force)
 #            time.sleep(0.2)
 #            #thread.start_new_thread(self.open_finger, (i, velocity,force))
@@ -184,7 +184,7 @@ class RoboLimb(object):
     def close_fingers(self, velocity=None, force = True):
         """Closes all digits at specified velocity."""
         velocity = self.__dev_vel if velocity == None else int(velocity)
-#        for i in xrange(1,6):
+#        for i in range(1,6):
 #            self.close_finger(finger=i, velocity=velocity, force=force)
 #            time.sleep(0.25)
         [self.close_finger(i, velocity=velocity, force = force) for i in range(1,6)]

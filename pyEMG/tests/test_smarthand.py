@@ -16,7 +16,7 @@ def random_position():
     pos[pos>1.] = 1
     return pos
 
-# Test 0: 
+# Test 0:
 s = SmartHand(s_port='COM10')
 s.start()
 s.posture([0., 1., 1., 1., 1])
@@ -113,7 +113,7 @@ s = SmartHand(s_port='COM10')
 s.start()
 finger = 3
 curr=[]
-for i in xrange(100):
+for i in range(100):
     if i == 5:
         s.set_motor_curr([0.6], motor=finger) # Current mdoe
 #        s.set_motor_curr_pos([0.6], motor=finger) # Current position mode
@@ -133,7 +133,7 @@ s = SmartHand(s_port='COM10')
 s.start()
 finger = 3
 force=[]
-for i in xrange(100):
+for i in range(100):
     if i == 5:
         s.close_finger(finger=finger,speed=0.8)
     force.append(s.get_finger_force(finger=finger))
