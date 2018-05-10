@@ -41,7 +41,7 @@ class TimerRepeater(object):
             None
         """
         while not self._event.wait(self._interval):
-			self._target(*self._args, **self._kwargs)
+            self._target(*self._args, **self._kwargs)
 
     # Starts the timer
     #
