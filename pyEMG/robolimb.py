@@ -5,7 +5,7 @@ Interface the Touch Bionics Robo-limb via a can bus interface (Peak-can USB).
 import numpy as np
 import time
 from can.interfaces import pcan
-from time_repeater import TimerRepeater
+from pyEMG.time_repeater import TimerRepeater
 import thread
 
 
