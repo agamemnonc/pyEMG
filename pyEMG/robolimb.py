@@ -62,7 +62,7 @@ class RoboLimb(object):
 
     """
 
-    def __init__(self,  def_vel=297, read_rate = 0.02, channel=pcan.PCAN_USBBUS1, b_rate=pcan.PCAN_BAUD_1M, hw_type=pcan.PCAN_TYPE_ISA, io_port=0x3BC, interrupt=3):
+    def __init__(self,  def_vel=297, read_rate=0.02, channel=pcan.PCAN_USBBUS1, b_rate=pcan.PCAN_BAUD_1M, hw_type=pcan.PCAN_TYPE_ISA, io_port=0x3BC, interrupt=3):
         """Class constructor."""
         self.channel = channel
         self.b_rate = b_rate
@@ -86,7 +86,7 @@ class RoboLimb(object):
         self.bus.Initialize(Channel=self.channel, Btr0Btr1=self.b_rate, HwType=self.hw_type, IOPort=self.io_port, Interrupt=self.interrupt)
         self.msg_read.start()
         time.sleep(1)
-        self.open_all(force = True)
+        self.open_all(force=True)
         time.sleep(1.5)
 
     def stop(self):
@@ -145,7 +145,7 @@ class RoboLimb(object):
                 CANMsg.DATA[i] = int(msg[i],16)
             self.bus.Write(self.channel,CANMsg)
 
-    def stop_finger(self, finger, force = True):
+    def stop_finger(self, finger, force=True):
         """Stops execution of digit movement."""
         finger = finger_dict[finger] if type(finger) == str else int(finger)
         if self.finger_status[finger-1] is "stop" and force is False:
@@ -162,43 +162,43 @@ class RoboLimb(object):
                 CANMsg.DATA[i] = int(msg[i],16)
             self.bus.Write(self.channel,CANMsg)
 
-    def open_fingers(self, velocity=None, force = True):
+    def open_fingers(self, velocity=None, force=True):
         """Opens all digits at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
-        [self.open_finger(i, velocity=velocity, force = force) for i in range(1,6)]
+        [self.open_finger(i, velocity=velocity, force=force) for i in range(1,6)]
 
 
-    def open_all(self, velocity=None, force = True):
+    def open_all(self, velocity=None, force=True):
         """Opens all digits and thumb rotator at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
-        self.open_fingers(velocity=velocity, force = force)
+        self.open_fingers(velocity=velocity, force=force)
         time.sleep(0.5)
-        self.open_finger(6, velocity=velocity, force = force)
+        self.open_finger(6, velocity=velocity, force=force)
 
 
-    def close_fingers(self, velocity=None, force = True):
+    def close_fingers(self, velocity=None, force=True):
         """Closes all digits at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
-        [self.close_finger(i, velocity=velocity, force = force) for i in range(1,6)]
+        [self.close_finger(i, velocity=velocity, force=force) for i in range(1,6)]
 
-    def close_all(self, velocity=None, force = True):
+    def close_all(self, velocity=None, force=True):
         """Closes all digits and thumb rotator at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
-        self.close_finger(6, velocity=velocity, force = force)
+        self.close_finger(6, velocity=velocity, force=force)
         time.sleep(0.5)
-        self.close_fingers(velocity=velocity, force = force)
+        self.close_fingers(velocity=velocity, force=force)
 
-    def stop_fingers(self, velocity=None, force = True):
+    def stop_fingers(self, velocity=None, force=True):
         """Stops execution of movement for all digits."""
         velocity = self.def_vel if velocity == None else int(velocity)
-        [self.stop_finger(i, force = force) for i in range(1,6)]
+        [self.stop_finger(i, force=force) for i in range(1,6)]
 
-    def stop_all(self, velocity=None, force = True):
+    def stop_all(self, velocity=None, force=True):
         """Stops execution of movement for all digits and thumb rotator."""
         velocity = self.def_vel if velocity == None else int(velocity)
-        [self.stop_finger(i, force = force) for i in range(1,7)]
+        [self.stop_finger(i, force=force) for i in range(1,7)]
 
-    def grasp(self, grasp_name, force = True):
+    def grasp(self, grasp_name, force=True):
         """Initiates a new thread to perform a grasp movement. This is done
         in order to avoid program execution while time.sleep() commands are
         used for grasp execution (pre-grasp/closing)."""
@@ -219,65 +219,65 @@ class RoboLimb(object):
         velocity = 297
         self.stop_all()
         if grasp_name == "open":
-            self.open_fingers(velocity = velocity)
+            self.open_fingers(velocity=velocity)
             time.sleep(1)
             self.pose = "open"
         elif grasp_name == "cylindrical":
             # Pre-grasp
-            [self.open_finger(i, velocity = velocity) for i in range(1,6)]
+            [self.open_finger(i, velocity=velocity) for i in range(1,6)]
             time.sleep(0.2)
-            self.close_finger(6, velocity = velocity)
+            self.close_finger(6, velocity=velocity)
             time.sleep(1.3)
             # Grasp
             self.stop_all()
-            self.close_fingers(velocity = velocity, force = True)
+            self.close_fingers(velocity=velocity, force=True)
             time.sleep(1)
             self.pose = "cylindrical"
         elif grasp_name == "lateral":
             # Pre-grasp
-            [self.open_finger(i, velocity = velocity) for i in range(1,4)]
+            [self.open_finger(i, velocity=velocity) for i in range(1,4)]
             time.sleep(0.2)
             #self.open_finger(1, velocity = velocity)
             #time.sleep(0.1)
-            self.open_finger(6, velocity = velocity, force = True)
+            self.open_finger(6, velocity=velocity, force=True)
             time.sleep(0.1)
             [self.stop_finger(i) for i in range(2,4)]
-            [self.close_finger(i, velocity = velocity) for i in range(2,6)]
+            [self.close_finger(i, velocity=velocity) for i in range(2,6)]
             time.sleep(1.2)
             # Grasp
             self.stop_all()
-            self.close_finger(1, velocity = velocity, force = True)
+            self.close_finger(1, velocity=velocity, force=True)
             time.sleep(1)
             self.pose = "lateral"
         elif grasp_name == "tridigit":
             # Pre-grasp
-            [self.open_finger(i, velocity = velocity) for i in range(1,4)]
+            [self.open_finger(i, velocity=velocity) for i in range(1,4)]
             time.sleep(0.1)
             [self.stop_finger(i) for i in range(1,4)]
-            [self.close_finger(i, velocity = velocity) for i in range(4,7)]
+            [self.close_finger(i, velocity=velocity) for i in range(4,7)]
             time.sleep(1.4)
             # Grasp
             self.stop_all()
-            [self.close_finger(i, velocity = velocity, force = True) for i in range(1,4)]
+            [self.close_finger(i, velocity=velocity, force=True) for i in range(1,4)]
             time.sleep(1)
             self.pose = "tridigit"
         elif grasp_name == "tridigit_ext":
             # Pre-grasp
-            self.open_fingers(velocity = velocity)
+            self.open_fingers(velocity=velocity)
             time.sleep(0.1)
             self.stop_fingers()
-            self.close_finger(6, velocity = velocity)
+            self.close_finger(6, velocity=velocity)
             time.sleep(1.4)
             # Grasp
             self.stop_all()
-            [self.close_finger(i, velocity = velocity, force = True) for i in range(1,4)]
+            [self.close_finger(i, velocity=velocity, force=True) for i in range(1,4)]
             time.sleep(1)
             self.pose = "tridigit_ext"
         elif grasp_name == "bidigit":
             # Pre-grasp
-            [self.open_finger(i, velocity = velocity) for i in range(1,3)]
+            [self.open_finger(i, velocity=velocity) for i in range(1,3)]
             time.sleep(0.1)
-            [self.close_finger(i, velocity = velocity) for i in range(3,7)]
+            [self.close_finger(i, velocity=velocity) for i in range(3,7)]
             time.sleep(1.3)
             self.stop_finger(6)
             self.open_finger(6)
@@ -285,14 +285,14 @@ class RoboLimb(object):
             self.stop_finger(6)
             # Grasp
             self.stop_all()
-            [self.close_finger(i, velocity = velocity, force = True) for i in range(1,4)]
+            [self.close_finger(i, velocity=velocity, force=True) for i in range(1,4)]
             time.sleep(1)
             self.pose = "bidigit"
         elif grasp_name == "bidigit_ext":
             # Pre-grasp
-            [self.open_finger(i, velocity = velocity) for i in range(1,6)]
+            [self.open_finger(i, velocity=velocity) for i in range(1,6)]
             time.sleep(0.1)
-            self.close_finger(6, velocity = velocity)
+            self.close_finger(6, velocity=velocity)
             time.sleep(1.3)
             self.stop_finger(6)
             self.open_finger(6)
@@ -300,29 +300,29 @@ class RoboLimb(object):
             self.stop_finger(6)
             # Grasp
             self.stop_all()
-            [self.close_finger(i, velocity = velocity, force = True) for i in range(1,3)]
+            [self.close_finger(i, velocity=velocity, force=True) for i in range(1,3)]
             time.sleep(1)
             self.pose = "bidigit_ext"
         elif grasp_name == "pointer":
             # Pre-grasp
-            [self.open_finger(i, velocity = velocity) for i in range(1,3)]
+            [self.open_finger(i, velocity=velocity) for i in range(1,3)]
             time.sleep(0.1)
-            self.open_finger(6, velocity = velocity)
+            self.open_finger(6, velocity=velocity)
             time.sleep(1.4)
             # Grasp
             self.stop_all()
-            [self.close_finger(i, velocity = velocity, force = True) for i in [1,3,4,5]]
+            [self.close_finger(i, velocity=velocity, force=True) for i in [1,3,4,5]]
             time.sleep(1)
             self.pose = "pointer"
         elif grasp_name == "thumbs_up":
             # Pre-grasp
-            self.open_finger(6, velocity = velocity)
+            self.open_finger(6, velocity=velocity)
             time.sleep(0.1)
-            [self.close_finger(i, velocity = velocity) for i in range(1,6)]
+            [self.close_finger(i, velocity=velocity) for i in range(1,6)]
             time.sleep(1.4)
             # Grasp
             self.stop_all()
-            self.open_finger(1, velocity = velocity, force = True)
+            self.open_finger(1, velocity=velocity, force=True)
             time.sleep(1)
             self.pose = "thumbs_up"
         else:
