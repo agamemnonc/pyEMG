@@ -5,7 +5,7 @@ import numpy as np
 import time
 import threading
 from can.interfaces import pcan
-from pyEMG.time_repeater import TimerRepeater
+from pyEMG.timer_repeater import TimerRepeater
 
 # Define some useful dictionaries (clf Robo-limb manual)
 finger_dict = {'thumb' : 1, 'index' : 2, 'middle' : 3, 'ring' : 4,
