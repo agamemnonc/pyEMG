@@ -190,7 +190,7 @@ class RoboLimb(object):
         velocity = self.def_vel if velocity == None else int(velocity)
         [self.stop_finger(i, force=force) for i in range(1,7)]
 
-    def grasp(self, grasp_name, force=True):
+    def grasp(self, grasp_name, force=True, print_action=False):
         """Initiates a new thread to perform a grasp movement. This is done
         in order to avoid program execution while time.sleep() commands are
         used for grasp execution (pre-grasp/closing).
@@ -199,10 +199,11 @@ class RoboLimb(object):
             pass
         else:
             if force is False and self.__executing_grasp == True:
-                pass
-                #print("Currently executing, skpping command...")
+                if print_action is True:
+                    print("Currently executing, skpping command...")
             else:
-                print("Executing " + grasp_name + " grasp...")
+                if print_action is True:
+                    print("Executing " + grasp_name + " grasp...")
                 threading.Thread(target=self.__execute_grasp, args=(grasp_name,)).start()
 
     def __execute_grasp(self, grasp_name):
