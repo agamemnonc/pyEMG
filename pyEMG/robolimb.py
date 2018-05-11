@@ -4,10 +4,9 @@ Interface the Touch Bionics Robo-limb via a can bus interface (Peak-can USB).
 
 import numpy as np
 import time
+import threading
 from can.interfaces import pcan
 from pyEMG.time_repeater import TimerRepeater
-import thread
-
 
 # Define some useful dictionaries (clf Robo-limb manual)
 finger_dict = {"thumb" : 1, "index" : 2, "middle" : 3, "ring" : 4,
@@ -212,7 +211,7 @@ class RoboLimb(object):
                 #print("Currently executing, skpping command...")
             else:
                 print("Executing " + grasp_name + " grasp...")
-                thread.start_new_thread(self.__execute_grasp, (grasp_name,))
+                threading.Thread(target=self.__execute_grasp, args=(grasp_name,)).start()
 
     def __execute_grasp(self, grasp_name):
         """Performs grasp movement at full velocity."""
