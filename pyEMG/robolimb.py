@@ -1,5 +1,4 @@
-"""
-Interface the Touch Bionics Robo-limb via a can bus interface (Peak-can USB).
+"""Interface the Touch Bionics Robo-limb hand via a can bus interface (Peak-can USB).
 """
 
 import numpy as np
@@ -15,7 +14,7 @@ action_dict = {"stop" : 0, "close" : 1, "open" : 2} # DOF action
 status_dict = {0 : "stop", 1 : "closing", 2 : "opening", 3 : "stalled close", 4 : "stalled open"} # DOF status
 
 class RoboLimb(object):
-    """ Handle some high level commands to the robotic hand via can bus interface.
+    """ Robo-limb hand control via can bus interface.
 
     Parameters
     ----------
@@ -42,7 +41,6 @@ class RoboLimb(object):
 
     Attributes
     ----------
-
     finger_status : list
         Finger status
 
@@ -50,9 +48,9 @@ class RoboLimb(object):
         Finger currents
 
     __moving : boolean
-        Flag indicating whether fingers are moving
+        Flag indicating whether at least one finger is moving
 
-    __executing : boolean
+    __executing_grasp : boolean
         Flag indicating whether a movement command is being executed
     """
 
@@ -70,7 +68,7 @@ class RoboLimb(object):
         self.msg_read = TimerRepeater("msgRead", self.read_rate, self.__read_messages)
         self.pose = None
         self.__moving = False
-        self.__executing = False
+        self.__executing_grasp = False
 
     def start(self):
         """Starts the connection."""
@@ -88,7 +86,8 @@ class RoboLimb(object):
 
     def __read_messages(self):
         """Reads at least one time the queue looking for messages. If a
-        message is found, looks again until queue is empty or an error occurs."""
+        message is found, looks again until queue is empty or an error occurs.
+        """
         stsResult = 0
         while not (stsResult & pcan.PCAN_ERROR_QRCVEMPTY):
             can_msg = self.bus.Read(self.channel)
@@ -98,7 +97,8 @@ class RoboLimb(object):
 
     def __process_message(self, can_msg):
         """Processes an incoming CAN message and updates finger_status and
-        finger_current attributes."""
+        finger_current attributes.
+        """
         finger_id = self._get_read_id(hex(can_msg[1].ID)) # Get finger ID
         self.finger_status[finger_id-1] = status_dict[can_msg[1].DATA[1]] # Update finger status (0-based indexing)
         self.__moving = bool(len(set(self.finger_status) & {"opening", "closing"})) # Update __moving flag
@@ -193,12 +193,12 @@ class RoboLimb(object):
     def grasp(self, grasp_name, force=True):
         """Initiates a new thread to perform a grasp movement. This is done
         in order to avoid program execution while time.sleep() commands are
-        used for grasp execution (pre-grasp/closing)."""
-
+        used for grasp execution (pre-grasp/closing).
+        """
         if grasp_name == 'rest' or grasp_name == None:
             pass
         else:
-            if force is False and self.__executing == True:
+            if force is False and self.__executing_grasp == True:
                 pass
                 #print("Currently executing, skpping command...")
             else:
@@ -207,7 +207,7 @@ class RoboLimb(object):
 
     def __execute_grasp(self, grasp_name):
         """Performs grasp movement at full velocity."""
-        self.__executing = True    # Update execution flag
+        self.__executing_grasp = True    # Update execution flag
         velocity = 297
         self.stop_all()
         if grasp_name == "open":
@@ -320,7 +320,7 @@ class RoboLimb(object):
         else:
             print("Unrecognized grasp, skipping...")
 
-        self.__executing = False
+        self.__executing_grasp = False
 
 
     def __get_message(self, finger, action, velocity):
@@ -343,8 +343,9 @@ class RoboLimb(object):
         return int(id_string[4])
 
     def is_executing(self):
-        """Read the value of private attribute self.__executing."""
-        return self.__executing
+        """Read the value of private attribute self.__executing_grasp."""
+        return self.__executing_grasp
 
     def is_moving(self):
+        """Read the value of private attribute self.__moving."""
         return self.__moving
