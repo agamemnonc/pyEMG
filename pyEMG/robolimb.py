@@ -8,10 +8,10 @@ from can.interfaces import pcan
 from pyEMG.time_repeater import TimerRepeater
 
 # Define some useful dictionaries (clf Robo-limb manual)
-finger_dict = {"thumb" : 1, "index" : 2, "middle" : 3, "ring" : 4,
-               "little" : 5, "rotator" : 6} # Robolimb DOFs
-action_dict = {"stop" : 0, "close" : 1, "open" : 2} # DOF action
-status_dict = {0 : "stop", 1 : "closing", 2 : "opening", 3 : "stalled close", 4 : "stalled open"} # DOF status
+finger_dict = {'thumb' : 1, 'index' : 2, 'middle' : 3, 'ring' : 4,
+               'little' : 5, 'rotator' : 6} # Robolimb DOFs
+action_dict = {'stop' : 0, 'close' : 1, 'open' : 2} # DOF action
+status_dict = {0 : 'stop', 1 : 'closing', 2 : 'opening', 3 : 'stalled close', 4 : 'stalled open'} # DOF status
 
 class RoboLimb(object):
     """ Robo-limb hand control via can bus interface.
@@ -65,7 +65,7 @@ class RoboLimb(object):
         self.read_rate = read_rate
         self.finger_status = [None]*6
         self.finger_current = np.zeros(6)
-        self.msg_read = TimerRepeater("msgRead", self.read_rate, self.__read_messages)
+        self.msg_read = TimerRepeater('msgRead', self.read_rate, self.__read_messages)
         self.pose = None
         self.__moving = False
         self.__executing_grasp = False
@@ -101,7 +101,7 @@ class RoboLimb(object):
         """
         finger_id = self._get_read_id(hex(can_msg[1].ID)) # Get finger ID
         self.finger_status[finger_id-1] = status_dict[can_msg[1].DATA[1]] # Update finger status (0-based indexing)
-        self.__moving = bool(len(set(self.finger_status) & {"opening", "closing"})) # Update __moving flag
+        self.__moving = bool(len(set(self.finger_status) & {'opening', 'closing'})) # Update __moving flag
         current_hex = str(can_msg[1].DATA[2])+str(can_msg[1].DATA[3]) # Get finger current
         self.finger_current[finger_id-1] = int(current_hex, 16) / 21.825 # Update finger current (mA)
 
@@ -109,14 +109,14 @@ class RoboLimb(object):
         """Opens single digit at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
         finger = finger_dict[finger] if type(finger) == str else int(finger)
-        if self.finger_status[finger-1] in ["opening", "stalled open"] and force is False:
+        if self.finger_status[finger-1] in ['opening', 'stalled open'] and force is False:
             pass
         else:
             CANMsg = pcan.TPCANMsg()
             CANMsg.ID = self._get_send_id(finger)
             CANMsg.LEN = 4
             CANMsg.MSGTYPE = pcan.PCAN_MESSAGE_STANDARD
-            msg = self.__get_message(finger, action="open", velocity=velocity)
+            msg = self.__get_message(finger, action='open', velocity=velocity)
             for i in range(CANMsg.LEN):
                 CANMsg.DATA[i] = int(msg[i],16)
             self.bus.Write(self.channel,CANMsg)
@@ -125,14 +125,14 @@ class RoboLimb(object):
         """Closes single digit at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
         finger = finger_dict[finger] if type(finger) == str else int(finger)
-        if self.finger_status[finger-1] in ["closing", "stalled close"] and force is False:
+        if self.finger_status[finger-1] in ['closing', 'stalled close'] and force is False:
             pass
         else:
             CANMsg = pcan.TPCANMsg()
             CANMsg.ID = self._get_send_id(finger)
             CANMsg.LEN = 4
             CANMsg.MSGTYPE = pcan.PCAN_MESSAGE_STANDARD
-            msg = self.__get_message(finger, action="close", velocity=velocity)
+            msg = self.__get_message(finger, action='close', velocity=velocity)
             for i in range(CANMsg.LEN):
                 CANMsg.DATA[i] = int(msg[i],16)
             self.bus.Write(self.channel,CANMsg)
@@ -140,16 +140,16 @@ class RoboLimb(object):
     def stop_finger(self, finger, force=True):
         """Stops execution of digit movement."""
         finger = finger_dict[finger] if type(finger) == str else int(finger)
-        if self.finger_status[finger-1] is "stop" and force is False:
+        if self.finger_status[finger-1] is 'stop' and force is False:
             pass
-        elif self.finger_status[finger-1] in ["stalled open", "stalled closed"] and force is False:
-            self.finger_status[finger-1] = "stop"
+        elif self.finger_status[finger-1] in ['stalled open', 'stalled closed'] and force is False:
+            self.finger_status[finger-1] = 'stop'
         else:
             CANMsg = pcan.TPCANMsg()
             CANMsg.ID = self._get_send_id(finger)
             CANMsg.LEN = 4
             CANMsg.MSGTYPE = pcan.PCAN_MESSAGE_STANDARD
-            msg = self.__get_message(finger, action="stop", velocity=290)
+            msg = self.__get_message(finger, action='stop', velocity=290)
             for i in range(CANMsg.LEN):
                 CANMsg.DATA[i] = int(msg[i],16)
             self.bus.Write(self.channel,CANMsg)
@@ -210,11 +210,11 @@ class RoboLimb(object):
         self.__executing_grasp = True    # Update execution flag
         velocity = 297
         self.stop_all()
-        if grasp_name == "open":
+        if grasp_name == 'open':
             self.open_fingers(velocity=velocity)
             time.sleep(1)
-            self.pose = "open"
-        elif grasp_name == "cylindrical":
+            self.pose = 'open'
+        elif grasp_name == 'cylindrical':
             # Pre-grasp
             [self.open_finger(i, velocity=velocity) for i in range(1,6)]
             time.sleep(0.2)
@@ -224,8 +224,8 @@ class RoboLimb(object):
             self.stop_all()
             self.close_fingers(velocity=velocity, force=True)
             time.sleep(1)
-            self.pose = "cylindrical"
-        elif grasp_name == "lateral":
+            self.pose = 'cylindrical'
+        elif grasp_name == 'lateral':
             # Pre-grasp
             [self.open_finger(i, velocity=velocity) for i in range(1,4)]
             time.sleep(0.2)
@@ -240,8 +240,8 @@ class RoboLimb(object):
             self.stop_all()
             self.close_finger(1, velocity=velocity, force=True)
             time.sleep(1)
-            self.pose = "lateral"
-        elif grasp_name == "tridigit":
+            self.pose = 'lateral'
+        elif grasp_name == 'tridigit':
             # Pre-grasp
             [self.open_finger(i, velocity=velocity) for i in range(1,4)]
             time.sleep(0.1)
@@ -252,8 +252,8 @@ class RoboLimb(object):
             self.stop_all()
             [self.close_finger(i, velocity=velocity, force=True) for i in range(1,4)]
             time.sleep(1)
-            self.pose = "tridigit"
-        elif grasp_name == "tridigit_ext":
+            self.pose = 'tridigit'
+        elif grasp_name == 'tridigit_ext':
             # Pre-grasp
             self.open_fingers(velocity=velocity)
             time.sleep(0.1)
@@ -264,8 +264,8 @@ class RoboLimb(object):
             self.stop_all()
             [self.close_finger(i, velocity=velocity, force=True) for i in range(1,4)]
             time.sleep(1)
-            self.pose = "tridigit_ext"
-        elif grasp_name == "bidigit":
+            self.pose = 'tridigit_ext'
+        elif grasp_name == 'bidigit':
             # Pre-grasp
             [self.open_finger(i, velocity=velocity) for i in range(1,3)]
             time.sleep(0.1)
@@ -279,8 +279,8 @@ class RoboLimb(object):
             self.stop_all()
             [self.close_finger(i, velocity=velocity, force=True) for i in range(1,4)]
             time.sleep(1)
-            self.pose = "bidigit"
-        elif grasp_name == "bidigit_ext":
+            self.pose = 'bidigit'
+        elif grasp_name == 'bidigit_ext':
             # Pre-grasp
             [self.open_finger(i, velocity=velocity) for i in range(1,6)]
             time.sleep(0.1)
@@ -294,8 +294,8 @@ class RoboLimb(object):
             self.stop_all()
             [self.close_finger(i, velocity=velocity, force=True) for i in range(1,3)]
             time.sleep(1)
-            self.pose = "bidigit_ext"
-        elif grasp_name == "pointer":
+            self.pose = 'bidigit_ext'
+        elif grasp_name == 'pointer':
             # Pre-grasp
             [self.open_finger(i, velocity=velocity) for i in range(1,3)]
             time.sleep(0.1)
@@ -305,8 +305,8 @@ class RoboLimb(object):
             self.stop_all()
             [self.close_finger(i, velocity=velocity, force=True) for i in [1,3,4,5]]
             time.sleep(1)
-            self.pose = "pointer"
-        elif grasp_name == "thumbs_up":
+            self.pose = 'pointer'
+        elif grasp_name == 'thumbs_up':
             # Pre-grasp
             self.open_finger(6, velocity=velocity)
             time.sleep(0.1)
@@ -316,7 +316,7 @@ class RoboLimb(object):
             self.stop_all()
             self.open_finger(1, velocity=velocity, force=True)
             time.sleep(1)
-            self.pose = "thumbs_up"
+            self.pose = 'thumbs_up'
         else:
             print("Unrecognized grasp, skipping...")
 
