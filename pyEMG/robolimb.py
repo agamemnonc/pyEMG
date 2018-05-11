@@ -19,7 +19,6 @@ class RoboLimb(object):
 
     Parameters
     ----------
-
     def_vel : int
         Default velocity for finger control
 
@@ -41,8 +40,6 @@ class RoboLimb(object):
     interrupt : int
         CAN interrupt handler
 
-
-
     Attributes
     ----------
 
@@ -52,14 +49,11 @@ class RoboLimb(object):
     finger_current : numpy array
         Finger currents
 
+    __moving : boolean
+        Flag indicating whether fingers are moving
+
     __executing : boolean
         Flag indicating whether a movement command is being executed
-
-
-    Methods
-    ----------
-
-
     """
 
     def __init__(self,  def_vel=297, read_rate=0.02, channel=pcan.PCAN_USBBUS1, b_rate=pcan.PCAN_BAUD_1M, hw_type=pcan.PCAN_TYPE_ISA, io_port=0x3BC, interrupt=3):
@@ -107,7 +101,7 @@ class RoboLimb(object):
         finger_current attributes."""
         finger_id = self._get_read_id(hex(can_msg[1].ID)) # Get finger ID
         self.finger_status[finger_id-1] = status_dict[can_msg[1].DATA[1]] # Update finger status (0-based indexing)
-        self.__moving = bool(len(set(self.finger_status) & {"opening", "closing"})) # Update __executing flag
+        self.__moving = bool(len(set(self.finger_status) & {"opening", "closing"})) # Update __moving flag
         current_hex = str(can_msg[1].DATA[2])+str(can_msg[1].DATA[3]) # Get finger current
         self.finger_current[finger_id-1] = int(current_hex, 16) / 21.825 # Update finger current (mA)
 
