@@ -198,7 +198,7 @@ class RoboLimb(object):
         if grasp_name == 'rest' or grasp_name == None:
             pass
         else:
-            if force is False and self.__executing_grasp == True:
+            if force is False and self.__executing_grasp is True:
                 if print_action is True:
                     print("Currently executing, skpping command...")
             else:
