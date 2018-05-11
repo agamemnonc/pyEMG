@@ -166,10 +166,6 @@ class RoboLimb(object):
     def open_fingers(self, velocity=None, force = True):
         """Opens all digits at specified velocity."""
         velocity = self.__dev_vel if velocity == None else int(velocity)
-#        for i in range(1,6):
-#            self.open_finger(finger=i, velocity=velocity, force=force)
-#            time.sleep(0.2)
-#            #thread.start_new_thread(self.open_finger, (i, velocity,force))
         [self.open_finger(i, velocity=velocity, force = force) for i in range(1,6)]
 
 
@@ -184,9 +180,6 @@ class RoboLimb(object):
     def close_fingers(self, velocity=None, force = True):
         """Closes all digits at specified velocity."""
         velocity = self.__dev_vel if velocity == None else int(velocity)
-#        for i in range(1,6):
-#            self.close_finger(finger=i, velocity=velocity, force=force)
-#            time.sleep(0.25)
         [self.close_finger(i, velocity=velocity, force = force) for i in range(1,6)]
 
     def close_all(self, velocity=None, force = True):
@@ -372,14 +365,3 @@ class RoboLimb(object):
 
     def is_moving(self):
         return self.__moving
-
-#    if __name__ == "__main__":
-#        """ Initialise an object and send some random grasp commands."""
-#        robo = RoboLimb()
-#        grasps = ['rest', 'open', 'cylindrical', 'lateral', 'tridigit', 'pointer']
-#
-#        for __ in range(500):
-#            robo.grasp(grasps[np.random.randint(len(grasps))])
-#            time.sleep(2)
-#
-#        robo.stop()
