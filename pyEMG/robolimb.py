@@ -69,7 +69,7 @@ class RoboLimb(object):
         self.hw_type = hw_type
         self.io_port = io_port
         self.interrupt = interrupt
-        self.set_default_velocity(def_vel)
+        self.def_vel = def_vel
         self.read_rate = read_rate
         self.finger_status = [None]*6
         self.finger_current = np.zeros(6)
@@ -115,7 +115,7 @@ class RoboLimb(object):
 
     def open_finger(self, finger, velocity=None, force = True):
         """Opens single digit at specified velocity."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         finger = finger_dict[finger] if type(finger) == str else int(finger)
         if self.finger_status[finger-1] in ["opening", "stalled open"] and force is False:
             pass
@@ -131,7 +131,7 @@ class RoboLimb(object):
 
     def close_finger(self, finger, velocity=None, force = True):
         """Closes single digit at specified velocity."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         finger = finger_dict[finger] if type(finger) == str else int(finger)
         if self.finger_status[finger-1] in ["closing", "stalled close"] and force is False:
             pass
@@ -164,13 +164,13 @@ class RoboLimb(object):
 
     def open_fingers(self, velocity=None, force = True):
         """Opens all digits at specified velocity."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         [self.open_finger(i, velocity=velocity, force = force) for i in range(1,6)]
 
 
     def open_all(self, velocity=None, force = True):
         """Opens all digits and thumb rotator at specified velocity."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         self.open_fingers(velocity=velocity, force = force)
         time.sleep(0.5)
         self.open_finger(6, velocity=velocity, force = force)
@@ -178,24 +178,24 @@ class RoboLimb(object):
 
     def close_fingers(self, velocity=None, force = True):
         """Closes all digits at specified velocity."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         [self.close_finger(i, velocity=velocity, force = force) for i in range(1,6)]
 
     def close_all(self, velocity=None, force = True):
         """Closes all digits and thumb rotator at specified velocity."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         self.close_finger(6, velocity=velocity, force = force)
         time.sleep(0.5)
         self.close_fingers(velocity=velocity, force = force)
 
     def stop_fingers(self, velocity=None, force = True):
         """Stops execution of movement for all digits."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         [self.stop_finger(i, force = force) for i in range(1,6)]
 
     def stop_all(self, velocity=None, force = True):
         """Stops execution of movement for all digits and thumb rotator."""
-        velocity = self.__dev_vel if velocity == None else int(velocity)
+        velocity = self.def_vel if velocity == None else int(velocity)
         [self.stop_finger(i, force = force) for i in range(1,7)]
 
     def grasp(self, grasp_name, force = True):
@@ -341,14 +341,6 @@ class RoboLimb(object):
         msg[2] = velocity[0:2]
         msg[3] = velocity[2:4]
         return msg
-
-    def set_default_velocity(self,velocity):
-        """Sets default velocity."""
-        self.__dev_vel = velocity
-
-    def get_default_velocity(self):
-        """Returns default velocity."""
-        return self.__dev_vel
 
     def _get_send_id(self,finger):
         """Returns the ID for sending a CAN message to specified finger."""
