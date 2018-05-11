@@ -230,8 +230,6 @@ class RoboLimb(object):
             # Pre-grasp
             [self.open_finger(i, velocity=velocity) for i in range(1,4)]
             time.sleep(0.2)
-            #self.open_finger(1, velocity = velocity)
-            #time.sleep(0.1)
             self.open_finger(6, velocity=velocity, force=True)
             time.sleep(0.1)
             [self.stop_finger(i) for i in range(2,4)]
