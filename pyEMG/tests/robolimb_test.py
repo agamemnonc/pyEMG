@@ -3,6 +3,7 @@ from pyEMG import RoboLimb
 
 """ Initialise an object and send some random grasp commands."""
 robo = RoboLimb()
+robo.start()
 grasps = ['rest', 'open', 'cylindrical', 'lateral', 'tridigit', 'pointer']
 
 for __ in range(10):

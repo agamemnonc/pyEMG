@@ -77,8 +77,6 @@ class RoboLimb(object):
         self.pose = None
         self.__moving = False
         self.__executing = False
-        self.start()
-
 
     def start(self):
         """Starts the connection."""
@@ -113,7 +111,7 @@ class RoboLimb(object):
         current_hex = str(can_msg[1].DATA[2])+str(can_msg[1].DATA[3]) # Get finger current
         self.finger_current[finger_id-1] = int(current_hex, 16) / 21.825 # Update finger current (mA)
 
-    def open_finger(self, finger, velocity=None, force = True):
+    def open_finger(self, finger, velocity=None, force=True):
         """Opens single digit at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
         finger = finger_dict[finger] if type(finger) == str else int(finger)
@@ -129,7 +127,7 @@ class RoboLimb(object):
                 CANMsg.DATA[i] = int(msg[i],16)
             self.bus.Write(self.channel,CANMsg)
 
-    def close_finger(self, finger, velocity=None, force = True):
+    def close_finger(self, finger, velocity=None, force=True):
         """Closes single digit at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
         finger = finger_dict[finger] if type(finger) == str else int(finger)
