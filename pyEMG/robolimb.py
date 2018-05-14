@@ -4,7 +4,7 @@
 import numpy as np
 import time
 import threading
-from can.interfaces import pcan
+from can.interfaces.pcan.PCANBasic import *
 from pyEMG.timer_repeater import TimerRepeater
 
 # Define some useful dictionaries (clf Robo-limb manual)
@@ -54,7 +54,7 @@ class RoboLimb(object):
         Flag indicating whether a movement command is being executed
     """
 
-    def __init__(self,  def_vel=297, read_rate=0.02, channel=pcan.PCAN_USBBUS1, b_rate=pcan.PCAN_BAUD_1M, hw_type=pcan.PCAN_TYPE_ISA, io_port=0x3BC, interrupt=3):
+    def __init__(self,  def_vel=297, read_rate=0.02, channel=PCAN_USBBUS1, b_rate=PCAN_BAUD_1M, hw_type=PCAN_TYPE_ISA, io_port=0x3BC, interrupt=3):
         """Class constructor."""
         self.channel = channel
         self.b_rate = b_rate
@@ -72,7 +72,7 @@ class RoboLimb(object):
 
     def start(self):
         """Starts the connection."""
-        self.bus = pcan.PCANBasic()
+        self.bus = PCANBasic()
         self.bus.Initialize(Channel=self.channel, Btr0Btr1=self.b_rate, HwType=self.hw_type, IOPort=self.io_port, Interrupt=self.interrupt)
         self.msg_read.start()
         time.sleep(1)
@@ -89,9 +89,9 @@ class RoboLimb(object):
         message is found, looks again until queue is empty or an error occurs.
         """
         stsResult = 0
-        while not (stsResult & pcan.PCAN_ERROR_QRCVEMPTY):
+        while not (stsResult & PCAN_ERROR_QRCVEMPTY):
             can_msg = self.bus.Read(self.channel)
-            if can_msg[0] == pcan.PCAN_ERROR_OK:
+            if can_msg[0] == PCAN_ERROR_OK:
                 self.__process_message(can_msg)
             stsResult = can_msg[0]
 
@@ -112,10 +112,10 @@ class RoboLimb(object):
         if self.finger_status[finger-1] in ['opening', 'stalled open'] and force is False:
             pass
         else:
-            CANMsg = pcan.TPCANMsg()
+            CANMsg = TPCANMsg()
             CANMsg.ID = self._get_send_id(finger)
             CANMsg.LEN = 4
-            CANMsg.MSGTYPE = pcan.PCAN_MESSAGE_STANDARD
+            CANMsg.MSGTYPE = PCAN_MESSAGE_STANDARD
             msg = self.__get_message(finger, action='open', velocity=velocity)
             for i in range(CANMsg.LEN):
                 CANMsg.DATA[i] = int(msg[i],16)
@@ -128,10 +128,10 @@ class RoboLimb(object):
         if self.finger_status[finger-1] in ['closing', 'stalled close'] and force is False:
             pass
         else:
-            CANMsg = pcan.TPCANMsg()
+            CANMsg = TPCANMsg()
             CANMsg.ID = self._get_send_id(finger)
             CANMsg.LEN = 4
-            CANMsg.MSGTYPE = pcan.PCAN_MESSAGE_STANDARD
+            CANMsg.MSGTYPE = PCAN_MESSAGE_STANDARD
             msg = self.__get_message(finger, action='close', velocity=velocity)
             for i in range(CANMsg.LEN):
                 CANMsg.DATA[i] = int(msg[i],16)
@@ -145,10 +145,10 @@ class RoboLimb(object):
         elif self.finger_status[finger-1] in ['stalled open', 'stalled closed'] and force is False:
             self.finger_status[finger-1] = 'stop'
         else:
-            CANMsg = pcan.TPCANMsg()
+            CANMsg = TPCANMsg()
             CANMsg.ID = self._get_send_id(finger)
             CANMsg.LEN = 4
-            CANMsg.MSGTYPE = pcan.PCAN_MESSAGE_STANDARD
+            CANMsg.MSGTYPE = PCAN_MESSAGE_STANDARD
             msg = self.__get_message(finger, action='stop', velocity=290)
             for i in range(CANMsg.LEN):
                 CANMsg.DATA[i] = int(msg[i],16)
