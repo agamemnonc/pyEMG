@@ -16,12 +16,11 @@ Implement DelsysStation for EMG/Acc sensors for Trigno
 
 from __future__ import print_function, division
 import socket
-import threading
 from struct import unpack
 import numpy as np
 import timeit
 from pyEMG.time_buffer import Buffer
-#from pyEMG.stoppable_thread import StoppableThread
+from pyEMG.stoppable_thread import StoppableThread
 
 
 class DelsysStation(object):
