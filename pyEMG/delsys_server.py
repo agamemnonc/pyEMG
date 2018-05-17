@@ -21,6 +21,7 @@ import numpy as np
 import timeit
 from pyEMG.time_buffer import Buffer
 from pyEMG.stoppable_thread import StoppableThread
+import time
 
 
 class DelsysStation(object):
@@ -168,7 +169,7 @@ class DelsysStation(object):
         self.imu_thread.stop()
         self._stopTime = timeit.default_timer()
         self.sdk.send(b'QUIT\r\n\r\n')
-        time.sleep(0.1) # Wait until the threads are stopped before closing the sockets
+        #time.sleep(0.05) # Wait until the threads are stopped before closing the sockets
         self.emg.close()
         self.sdk.close()
         self.imu.close()
