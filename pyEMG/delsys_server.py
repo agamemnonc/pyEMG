@@ -21,8 +21,6 @@ import numpy as np
 import timeit
 from pyEMG.time_buffer import Buffer
 from pyEMG.stoppable_thread import StoppableThread
-import time
-
 
 class DelsysStation(object):
     '''
