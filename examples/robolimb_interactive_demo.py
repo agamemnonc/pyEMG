@@ -9,8 +9,13 @@ time.sleep(2)
 
 movement_dict = {1:"cylindrical", 2:"lateral", 3:"tridigit_ext", 4:"bidigit_ext", 5:"pointer", 6:"thumbs_up"}
 
+# Support Python 2 and 3 input
+get_input = input
+if sys.version_info[:2] <= (2, 7):
+    get_input = raw_input
+
 while(True):
-	grasp_input = input('Grasp (1:cylindrical, 2:lateral, 3:tridigit_ext, 4:bidigit_ext, 5:pointer, 6:thumbs_up, 0:exit)\n') # Wait for input after object placement
+	grasp_input = get_input('Grasp (1:cylindrical, 2:lateral, 3:tridigit_ext, 4:bidigit_ext, 5:pointer, 6:thumbs_up, 0:exit)\n') # Wait for input after object placement
 	if int(grasp_input) not in (list(movement_dict.keys()) + [0]):
 		print("Movement not understood, pleas try again.")
 		pass
@@ -27,6 +32,6 @@ while(True):
 	else:
 		r.grasp(movement_dict[int(grasp_input)])
 		time.sleep(1.5)
-		_ = input('Press to open')
+		_ = get_input('Press to open')
 		r.open_fingers()
 		time.sleep(1.5)
