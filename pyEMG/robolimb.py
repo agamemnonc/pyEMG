@@ -159,14 +159,12 @@ class RoboLimb(object):
         velocity = self.def_vel if velocity == None else int(velocity)
         [self.open_finger(i, velocity=velocity, force=force) for i in range(1,6)]
 
-
     def open_all(self, velocity=None, force=True):
         """Opens all digits and thumb rotator at specified velocity."""
         velocity = self.def_vel if velocity == None else int(velocity)
         self.open_fingers(velocity=velocity, force=force)
         time.sleep(0.5)
         self.open_finger(6, velocity=velocity, force=force)
-
 
     def close_fingers(self, velocity=None, force=True):
         """Closes all digits at specified velocity."""
@@ -180,14 +178,12 @@ class RoboLimb(object):
         time.sleep(0.5)
         self.close_fingers(velocity=velocity, force=force)
 
-    def stop_fingers(self, velocity=None, force=True):
+    def stop_fingers(self, force=True):
         """Stops execution of movement for all digits."""
-        velocity = self.def_vel if velocity == None else int(velocity)
         [self.stop_finger(i, force=force) for i in range(1,6)]
 
-    def stop_all(self, velocity=None, force=True):
+    def stop_all(self, force=True):
         """Stops execution of movement for all digits and thumb rotator."""
-        velocity = self.def_vel if velocity == None else int(velocity)
         [self.stop_finger(i, force=force) for i in range(1,7)]
 
     def grasp(self, grasp_name, force=True, print_action=False):
