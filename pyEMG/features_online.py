@@ -118,7 +118,7 @@ def _levinson(r, order=None, allow_singularity=False):
         if k == 0:
             continue
 
-        khalf = (k+1)/2
+        khalf = int((k+1)/2)
         if realdata is True:
             for j in range(0, khalf):
                 kj = k-j-1
