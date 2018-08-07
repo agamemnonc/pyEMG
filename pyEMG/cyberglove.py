@@ -197,7 +197,7 @@ class CyberGlove(object):
         self.si.flushInput()
         raw_measurement = None
         while raw_measurement is None:
-            nb = self.si.write(bytes('\x47'))
+            nb = self.si.write(bytes('\x47', 'utf'))
             if nb == 1:
                 msg = self.si.read(size=self.__bytesPerRead)
                 if len(msg) is self.__bytesPerRead:
