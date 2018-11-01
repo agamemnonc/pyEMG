@@ -134,7 +134,7 @@ def ismember(a, b):
     for i, elt in enumerate(b):
         if elt not in bind:
             bind[elt] = i
-    return np.where(np.asarray([bind.get(itm, None) for itm in a]) >= 0)[0]
+    return np.where(np.asarray([bind.get(itm, -1) for itm in a]) >= 0)[0]
 
 def write_to_txt(outfile, array, fmt='%.18f'):
     """Write numpy array data into text files."""
