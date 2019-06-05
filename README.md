@@ -2,6 +2,8 @@
 
 Python package for offline and real-time myoelectric control by using sEMG and IMU signals.
 
+As of January 2019, this repository is no longer developed or mainained. 
+
 ## Dependencies
 * [numpy](http://www.numpy.org/)
 * [scipy](https://www.scipy.org/)
