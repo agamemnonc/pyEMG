@@ -2,7 +2,7 @@
 
 Python package for offline and real-time myoelectric control by using sEMG and IMU signals.
 
-**As of January 2019, this repository is no longer developed or maintained.**
+**As of January 2019, this repository is no longer developed or maintained. I am currently using and contributing to [axopy](https://github.com/axopy/axopy).**
 
 ## Dependencies
 * [numpy](http://www.numpy.org/)
